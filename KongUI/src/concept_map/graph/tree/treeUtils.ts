@@ -226,12 +226,17 @@ export class TreeUtils {
     newNodes: Node<RFNodeData>[];
     newEdges: any[];
   } => {
+    // this effectively removes the children so that we can add them back in
+    // via the updated subgraph
+    const { childNodes } = this.getAllChildren(serverNode.id);
     const {
       beforeNodes,
       beforeEdges,
       afterNodes,
       afterEdges
-    } = this.getNodesBeforeAfter(serverNode.id, 0);
+    } = this.getNodesBeforeAfter(serverNode.id, childNodes.length);
+
+    // console.log("server node: ", serverNode);
 
     const stack: Array<[BackendNode, number, string]> =  [
       [serverNode, this.getNodeDepth(serverNode.id), this.parent(serverNode.id).id]
@@ -257,7 +262,12 @@ export class TreeUtils {
       })
     }
 
+    // console.log("After nodes: ", afterNodes.map(n => n.data.title));
+    // console.log("Updated nodes: ", updatedSubtreeNodes.map(n => n.data.title));
+
     const newNodes = beforeNodes
+      // error here due to getNodes before after being 0
+      // 
       .concat(updatedSubtreeNodes)
       .concat(afterNodes)
       .map((node, index) => ({
