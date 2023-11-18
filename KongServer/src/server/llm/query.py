@@ -1,4 +1,4 @@
-from src.KongBot.bot.base.query import BaseLLMQueryV2
+from src.KongBot.bot.base.query import BaseLLMQueryV2, BaseLLMQuery
 from .prompts import *
 
 class GenTree(BaseLLMQueryV2):
@@ -38,3 +38,14 @@ class GenParagraphFromSubtree(BaseLLMQueryV2):
                  model: str = "gpt3"):
         super().__init__(cache_policy=cache_policy, model=model, json_output=False)
         super().init_prompt(GEN_PARAGRAPH_FROM_TREE, context=context, subtree=subtree)
+
+class GenSubTreeQueryV3(BaseLLMQuery):
+    """
+    Gen sub tree query v3 with greater separation between ancestor and current context
+    """
+    def __init__(self,
+                 context: str, ancestor_tree: str, subtree: str, 
+                 cache_policy: str = "default", model: str = "gpt4"):
+
+        super().__init__(cache_policy=cache_policy, model=model)
+        super().init_prompt(SUBTREE_V3, context=context, ancestor_tree=ancestor_tree, subtree=subtree)

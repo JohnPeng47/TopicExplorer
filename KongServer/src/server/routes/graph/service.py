@@ -73,19 +73,19 @@ def delete_graph_db(graph_id: str):
         "id": graph_id,
     })
 
+# this should honestly just be a KG initialization function
 def create_graph(curriculum: str, title: str) -> KnowledgeGraph:
     new_kg = KnowledgeGraph(curriculum)
     new_kg.add_node({
         "id": str(uuid.uuid4()),
         "node_data": {
-            "title": "",
+            "title": curriculum,
             "node_type": "ROOT",
             "children": []
         }
     })
-
-    save_graph(new_kg, title=title)
-    return True
+    
+    return new_kg
 
 # Dependencies
 def check_graph_user_auth(user: User, graph: KnowledgeGraph) -> KnowledgeGraph:
