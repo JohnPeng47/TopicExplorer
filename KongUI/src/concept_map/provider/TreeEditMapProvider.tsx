@@ -38,7 +38,7 @@ interface TreeEditMap {
   genGraphDesc: (graphId: string) => Promise<AxiosResponse>;
   collapseNodes: (parentId: string, expand: boolean) => void;
   addNode: (parentId: string) => void;
-  genSubgraphParagraph: (subgraphId: string) => void;
+  genSubgraphParagraph: (subgraphId: string) => Promise<AxiosResponse>;
   nodesWithoutDescr: number;
 }
 

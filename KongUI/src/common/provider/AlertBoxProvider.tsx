@@ -42,7 +42,7 @@ import {
         duration: 3000,
         position: {
           vertical: "bottom",
-          horizontal: "right"
+          horizontal: "left"
         }
       });
     }, []);

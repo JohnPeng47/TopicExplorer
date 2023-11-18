@@ -32,10 +32,17 @@ type TreeNodeProps = {
     openSideMenu: (data: RFNodeData, open: boolean) => void;
   };
 
+const generatedNodeStyle = {
+  border: "solid",
+  borderWidth: 1,
+  borderColor: "red"
+}
+
 function TreeNode({ data, isConnectable, selected, xPos, yPos, openSideMenu}: TreeNodeProps) {
   const [showPopup, setShowPopup] = useState(false);
   const [collapsed, setCollapsed] = useState(true);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [GenTopicsLoading, setGenTopicsLoading] = useState<boolean>(false);
+
   const [navToMap, setNavToMap] = useState(false);
   const titleRef = useRef<string>(data.title);
 
@@ -64,15 +71,13 @@ function TreeNode({ data, isConnectable, selected, xPos, yPos, openSideMenu}: Tr
   }
 
   useEffect(() => {
-    console.log("Selected1: ", selected);
     if (selected) {
-      console.log("Selected2: ", selected);
       openSideMenu(data, true);
     }
   }, [data, selected, openSideMenu])
 
     
-  function GenDescrBtn() { 
+  function GenDescrBtn(): JSX.Element { 
     return (
       <Button 
         sx={{ height: "100%", marginLeft: 1 }}
@@ -93,6 +98,27 @@ function TreeNode({ data, isConnectable, selected, xPos, yPos, openSideMenu}: Tr
     );
   }
 
+  function GenGraphTopicsBtn(): JSX.Element {
+    return <Button sx={{
+      width: 100,            // Set a specific width for the button
+      marginLeft: 1            // Optional: add a little spacing between the TextField and Button
+    }} variant="contained" color="primary" onClick={() =>  {
+        setGenTopicsLoading(true);
+        genSubGraph(data.id).then((_) => {
+          sendToast("Finished generating!", "success");
+          setNavToMap(false);
+        }).catch((err) => {
+          sendToast(`Server error: ${err}`, "success");
+          // Success
+        }).finally(() => {
+          setGenTopicsLoading(false);
+        })
+      }
+    }>
+      Re-generate
+    </Button>
+  }
+  
   function NavToMapBtn() { 
     return (
       <Button 
@@ -108,9 +134,7 @@ function TreeNode({ data, isConnectable, selected, xPos, yPos, openSideMenu}: Tr
   
   return (
     <div style={{ display: 'flex', alignItems: 'center' }}>
-        <Handle type="target" position={Position.Left} isConnectable={isConnectable} />
-
-
+      <Handle type="target" position={Position.Left} isConnectable={isConnectable} />
       <Box sx={{
         display: 'flex', // Horizontal layout
         flexDirection: 'row',
@@ -119,7 +143,7 @@ function TreeNode({ data, isConnectable, selected, xPos, yPos, openSideMenu}: Tr
         <Box sx={{
           display: 'flex',             // Turn this box into a flex container
           alignItems: 'center',        // Align items vertically in the center
-          width: 1500,
+          width: 600,
           maxWidth: '100%',
           border: "black"
         }}>
@@ -131,16 +155,17 @@ function TreeNode({ data, isConnectable, selected, xPos, yPos, openSideMenu}: Tr
             onChange={handleInputChange}
             fullWidth
             defaultValue={data.title}
-            sx={{ 
-              borderColor: "red",
-              width: 500,
-            }}       // Allow the text field to grow as needed
+            sx={data.description ? generatedNodeStyle : {}}
+                 // Allow the text field to grow as needed
           >
           </TextField>
 
-          <Stack className="treenode-button-group" sx={{
-            display: selected ? "" : "none"
-          }} direction={"row"}>
+          <Stack className="treenode-button-group" 
+            sx={{
+              padding: 0,
+              display: selected ? "" : "none"
+            }} 
+            direction={"row"}>
             {
               collapsed ?
               <IconButton color="error" onClick={() =>  {
@@ -178,24 +203,7 @@ function TreeNode({ data, isConnectable, selected, xPos, yPos, openSideMenu}: Tr
               <CloseIconOutlined ></CloseIconOutlined>
             </IconButton>
 
-            <Button sx={{
-              width: 100,            // Set a specific width for the button
-              marginLeft: 1            // Optional: add a little spacing between the TextField and Button
-            }} variant="contained" color="primary" onClick={() =>  {
-                setLoading(true);
-                genSubGraph(data.id).then((_) => {
-                  sendToast("Finished generating!", "success");
-                  setNavToMap(false);
-                }).catch((err) => {
-                  sendToast(`Server error: ${err}`, "success");
-                  // Success
-                }).finally(() => {
-                  setLoading(false);
-                })
-              }
-            }>
-              Re-generate
-            </Button>
+            <GenGraphTopicsBtn></GenGraphTopicsBtn>
           </Stack>
 
           {
@@ -212,7 +220,7 @@ function TreeNode({ data, isConnectable, selected, xPos, yPos, openSideMenu}: Tr
             width: '50', // This Box will take 20% of the parent Box's width
           }}>
             {
-              loading &&
+              GenTopicsLoading &&
               <CircularProgress /> // This will be rendered when loading is true
             }
           </Box>
