@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { Handle, Position } from 'reactflow';
 import { RFNodeData } from "../../../common/common-types";
 import { 
@@ -60,9 +60,17 @@ function TreeNode({ data, isConnectable, selected, xPos, yPos, openSideMenu}: Tr
   };
 
   if (selected) {
-    console.log("selected node: ", data.id);
     openSideMenu(data, true);
   }
+
+  useEffect(() => {
+    console.log("Selected1: ", selected);
+    if (selected) {
+      console.log("Selected2: ", selected);
+      openSideMenu(data, true);
+    }
+  }, [data, selected, openSideMenu])
+
     
   function GenDescrBtn() { 
     return (

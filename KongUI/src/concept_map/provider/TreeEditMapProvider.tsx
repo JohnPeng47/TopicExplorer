@@ -3,11 +3,13 @@ import React, {
     useCallback, 
     useEffect,
     useRef,
+    useState,
     useMemo
   } from "react";
 import { createContext, useContext } from "use-context-selector";
 import { useMemoObject } from "../../common/hooks/useMemo";
 import { 
+  useOnSelectionChange,
   useReactFlow, 
   Node,
   Edge
@@ -173,6 +175,30 @@ export const TreeEditMapProvider = memo(
       changeEdges(newEdges);
   }, [changeNodes, changeEdges]);
 
+  
+  /**
+   * Listen for de-selection due to generate paragraph, and re-select node
+   */
+  const [genParagraph, setGenParagraph] = useState(false);
+  const [selectedNodeId, setSelectedNodeId] = useState("");
+  useOnSelectionChange({
+    onChange: ({ nodes }) => {
+      if (nodes.length > 1)
+        throw Error("More than one node selected");
+
+      if (nodes.length === 0 && genParagraph) {
+        modifyNode(selectedNodeId, (old) => ({
+            ...old,
+            selected : true
+          })
+        );
+        setGenParagraph(false);
+
+      } else if (nodes.length === 1) {
+        setSelectedNodeId(nodes[0].id);
+      }
+    },
+  });
 
   /**
    * Sync backend
@@ -237,8 +263,8 @@ export const TreeEditMapProvider = memo(
           newNodes, 
           newEdges
         } = graph.updateSubtreeJson(res.data);
-        console.log("Finished generating paragraph: ", res.data)
 
+        setGenParagraph(true);
         changeNodes(newNodes);
         changeEdges(newEdges);
         resolve(res.data);

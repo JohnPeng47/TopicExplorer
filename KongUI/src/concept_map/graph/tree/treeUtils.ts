@@ -133,93 +133,6 @@ export class TreeUtils {
     return { newNodes, newEdges };
   };
 
-  /**
-   * Takes an update to the existing RFNode state initialized by
-   * initJson, and updates position while keeping all the pre-existing
-   * nodes in the same fixed position
-   * 
-   * In the future, support add node with this interface
-   */
-  // public updateSubtreeJson = (
-  //   parentNode: BackendNode,
-  // ): {
-  //   updateNodes: Node<RFNodeData>[];
-  //   updateEdges: any[];
-  // } => {
-  //   // return empty nodes and edges
-  //   if (!parentNode) {
-  //     return {
-  //       updateNodes: [],
-  //       updateEdges: []
-  //     };
-  //   }
-  //   const { childNodes } = this.getAllChildren(parentNode.id);
-  //   const numChildrenBefore = childNodes.length
-  //   console.log("New nodes: ", this.numNewNodes(parentNode));
-
-  //   let numChildren = 0;
-  //   let nodeIndex = this.getNodeIndex(parentNode.id);
-
-  //   if (nodeIndex < 0)
-  //     throw Error("Missing sibling or parent node");
-
-  //   // let depth = this.nodeDepth[parentNode.id];
-  //   let depth = this.getNodeDepth(parentNode.id);
-  //   const stack: Array<[BackendNode, number, string]> = [[parentNode, depth, parentNode.id]];
-
-  //   // nodes that came before, not including the parent
-  //   const oldNodes = this.getNodes().slice(0, nodeIndex);
-  //   const oldEdges = this.getEdges().slice(0, nodeIndex - 1);
-
-  //   // these are new nodes added from the update
-  //   const updateNodes = [];
-  //   const updateEdges = [];
-
-  //   // nodes that comes after the last children of the parent node
-  //   let repoNodes = this.getNodes().slice(nodeIndex + numChildrenBefore + 1);
-  //   let repoEdges = this.getEdges().slice(nodeIndex + numChildrenBefore - 1 + 1);
-
-    // while (stack.length > 0) {
-    //   const [currNode, depth, parentId] = stack.pop();
-
-    //   const rfNode = this.getNodeIndex(currNode.id) < 0
-    //     ? ConvertNode(currNode, "Tree")
-    //     : this.findNodeRF(currNode.id)
-    //   const rfEdge = this.getNodeIndex(currNode.id) < 0
-    //     ? ConvertEdge(currNode, parentId, "Tree")
-    //     : this.findEdge(currNode.id)
-
-    //   // determine initial node position
-    //   const position = this.nodePosInit(depth, nodeIndex);
-    //   rfNode.position = position;
-
-    //   updateNodes.push(rfNode);
-    //   updateEdges.push(rfEdge);
-
-    //   this.children(currNode).forEach((child) => {
-    //     stack.push([child, depth + 1, currNode.id]);
-    //   })
-
-    //   nodeIndex += 1;
-    //   numChildren += 1;
-    // }
-
-  //   // shift position
-  //   repoNodes = repoNodes.map((node) => ({
-  //     ...node,
-  //     position: {
-  //       x: node.position.x,
-  //       y: node.position.y + (numChildren - numChildrenBefore - 1) * this.Y_INTERVAL
-  //     }
-  //   }))
-
-  //   // that the order of setNodes does not matter
-  //   return {
-  //     updateNodes: oldNodes.concat(updateNodes).concat(repoNodes),
-  //     updateEdges: oldEdges.concat(updateEdges).concat(repoEdges)
-  //   };
-  // };
-
   public updateSubtreeJson = (
     serverNode: BackendNode,
   ): {
@@ -263,7 +176,7 @@ export class TreeUtils {
     }
 
     // console.log("After nodes: ", afterNodes.map(n => n.data.title));
-    // console.log("Updated nodes: ", updatedSubtreeNodes.map(n => n.data.title));
+    // console.log("Updated nodes: ", updatedSubtreeNodes.map(n => n.data.description));
 
     const newNodes = beforeNodes
       // error here due to getNodes before after being 0

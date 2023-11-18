@@ -62,7 +62,10 @@ export default function SideMenu(props: SideMenuProps) {
                     value={props.data ? props.data.description : ""}
                     variant="standard"
                 />
-                <Button onClick={() => genSubgraphParagraph(props.data.id)}>Generate Paragraph</Button>
+                <Button onClick={() => {
+                    console.log("Generating paragraph for: ", props.data.title);
+                    genSubgraphParagraph(props.data.id);
+                }}>Generate Paragraph</Button>
             </Stack>
             </Drawer>
         </div>
