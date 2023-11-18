@@ -7,7 +7,7 @@ from src.server.database.db import DBConnection
 from fastapi import Depends, Body
 
 from .exceptions import GraphAuthorizationError, GraphNotFound
-from .schema import GraphMetadata, GenSubgraphRequest
+from .schema import GraphMetadata, GenSubgraphTopicsRequest
 from ..auth.schema import User
 
 

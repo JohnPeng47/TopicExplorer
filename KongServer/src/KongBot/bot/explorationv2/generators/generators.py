@@ -187,6 +187,37 @@ def generate_short_description(graph: KnowledgeGraph):
         graph.modify_node(node_id, {
             "description": description})
 
+def generate_short_description(graph: KnowledgeGraph):
+    global_config = graph.config["global"]
+    subtree_size = global_config["subtree_size"]
+
+    config: Dict = graph.config["generate_short_description"]
+    cache_policy = config.get("cache_policy", "default")
+    model = config.get("model", "gpt4")
+
+    mt_input_args = [
+        GeneratorArg(
+            node_id=node_id,
+            data={
+                "subtree": graph.display_tree(node_id, lineage=True, stop_depth=subtree_size),
+            }
+        ) for node_id in list(graph.nodes)
+        if not graph.get_node(node_id)["node_data"].get("description")
+    ]
+
+    logger.debug(f"Generating {len(mt_input_args)} short descriptions")
+
+    nodes_details_query = GenDetailedDecrSubtreeQuery.mt_init(cache_policy=cache_policy,
+                                                              model=model)
+    results: List[GeneratorResult] = nodes_details_query.mt_get_llm_output(
+        mt_input_args)
+
+    for i, res in enumerate(results):
+        node_id = res.node_id
+        description = res.data
+        graph.modify_node(node_id, {
+            "description": description})
+
 
 def generate_entity_relations(graph: KnowledgeGraph):
     global_config = graph.config["global"]

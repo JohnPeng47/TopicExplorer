@@ -36,6 +36,7 @@ interface TreeEditMap {
   genGraphDesc: (graphId: string) => Promise<AxiosResponse>;
   collapseNodes: (parentId: string, expand: boolean) => void;
   addNode: (parentId: string) => void;
+  genSubgraphParagraph: (subgraphId: string) => void;
   nodesWithoutDescr: number;
 }
 
@@ -204,12 +205,12 @@ export const TreeEditMapProvider = memo(
       backend.genSubGraph(subgraph, rootId)
         .then((res) => {
           const {
-            updateNodes, 
-            updateEdges
+            newNodes, 
+            newEdges
           } = graph.updateSubtreeJson(res.data);
   
-          changeNodes(updateNodes);
-          changeEdges(updateEdges);
+          changeNodes(newNodes);
+          changeEdges(newEdges);
           resolve(res.data);
         })
         .catch((err) => {
@@ -227,6 +228,28 @@ export const TreeEditMapProvider = memo(
     return backend.genGraphDesc(graphId);
   } 
   
+  const genSubgraphParagraph = ( subgraphId: string ): Promise<AxiosResponse> => {
+    const rootId = getNodes()[0].id;
+
+    return new Promise((resolve, reject) => {
+      backend.genSubgraphParagraph(rootId, subgraphId).then((res) => {
+        const {
+          newNodes, 
+          newEdges
+        } = graph.updateSubtreeJson(res.data);
+        console.log("Finished generating paragraph: ", res.data)
+
+        changeNodes(newNodes);
+        changeEdges(newEdges);
+        resolve(res.data);
+      })
+      .catch((err) => {
+        console.error("Error from server: ", err);
+        reject(err);
+      });
+    });
+  }
+
   const saveGraph = (title: string): void => {
     const rootNode = getNodes()[0];
     console.log("Saving graph: ", rootNode);
@@ -244,6 +267,7 @@ export const TreeEditMapProvider = memo(
     genGraphDesc,
     collapseNodes,
     addNode,
+    genSubgraphParagraph,
     nodesWithoutDescr: nodesWithoutDescr.current
   });
   

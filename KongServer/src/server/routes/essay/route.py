@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 from src.server.routes.graph.service import get_graph
 from src.KongBot.bot.base import KnowledgeGraph
-from src.KongBot.bot.essay_gen.generator import generate_essay_from_tree
+# from src.KongBot.bot.essay_gen.generator import generate_essay_from_tree
 router = APIRouter()
 
 @router.get("/essay/{graph_id}")

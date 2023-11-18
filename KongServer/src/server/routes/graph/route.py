@@ -1,4 +1,5 @@
-from .schema import GenSubgraphRequest, CreateGraphRequest, GraphMetadataResp, GraphNode, RFNode, SaveGraphReq, rfnode_to_kgnode
+from .schema import GenSubgraphTopicsRequest, GenParagraphRequest, \
+CreateGraphRequest, GraphMetadataResp, GraphNode, RFNode, SaveGraphReq, rfnode_to_kgnode
 from .service import create_graph, get_graph, get_graph_metadata_db, list_graph_metadata_db, \
 get_graph_db, delete_graph_db, delete_graph_metadata_db, save_graph, GraphManager
 
@@ -10,8 +11,10 @@ from fastapi import HTTPException
 
 from networkx.exception import NetworkXError
 
+from src.server.routes.essay import GenParagraphFromSubtree
+
 from src.KongBot.bot.base import KnowledgeGraph
-from src.KongBot.bot.explorationv2.llm import GenSubTreeQueryV2
+from src.KongBot.bot.explorationv2.llm import GenSubTreeQueryV2, GenSubTreeQueryV3
 from src.KongBot.bot.adapters.ascii_tree_to_kg import ascii_tree_to_kg_v2
 from src.KongBot.bot.explorationv2 import generate_short_description
 
@@ -110,7 +113,7 @@ def update_graph_route(graph_id: str,
 
 @router.post("/gen/subgraph/{graph_id}", response_model=GraphNode)
 def gen_subgraph_route(graph_id: str,
-                        request: GenSubgraphRequest = Body(...),
+                        request: GenParagraphRequest = Body(...),
                         kg: KnowledgeGraph = Depends(get_graph)):
     rf_subgraph_json = rfnode_to_kgnode(request.subgraph)
     # get the old 
@@ -173,6 +176,25 @@ def get_tree_router(
     router = APIRouter()
     graph_lock = lock_graph(graph_manager)
 
+    @router.post("/gen/descriptions/subgraph/{graph_id}", response_model=GraphNode)
+    def gen_subgraph_paragraph(graph_id: str,
+                            request: GenParagraphRequest = Body(...)):
+        subgraph_id, model = request.subgraph_id, request.model
+        kg = graph_manager.get_graph(graph_id)
+        subtree = kg.display_tree(subgraph_id, lineage=True)
+        context = kg.curriculum
+
+        print("Context: ", kg.curriculum)
+        print("Subtree: ", subtree)
+
+        paragraph = GenParagraphFromSubtree(context, subtree).get_llm_output()
+        kg.modify_node(subgraph_id, {
+            "description" : paragraph
+        })
+
+        modified_node = kg.get_node(subgraph_id)
+        return json.loads(kg.to_json_frontend(node=modified_node))
+
     @router.post("/graph/v2/update/{graph_id}")
     @graph_lock
     def update_graph_route(graph_id: str,
@@ -191,8 +213,8 @@ def get_tree_router(
     
     @router.post("/gen/v2/subgraph/{graph_id}", response_model=GraphNode)
     @graph_lock
-    def gen_subgraph_route(graph_id: str,
-                            request: GenSubgraphRequest = Body(...)):
+    def gen_subgraph_topics(graph_id: str,
+                            request: GenSubgraphTopicsRequest = Body(...)):
         kg = graph_manager.get_graph(graph_id)
         rf_subgraph_json = rfnode_to_kgnode(request.subgraph)
         # get the old 
@@ -211,13 +233,14 @@ def get_tree_router(
                 content = json.loads(kg.to_json_frontend(node=old_node))
             )
         
-        tree1, tree2, _ = kg.display_tree_v2_lineage(rf_subgraph_json["id"])
+        ancestors, subtree, _ = kg.display_tree_v2_lineage(rf_subgraph_json["id"])
         retry, success = 6, False
         default_model = "gpt3"
         while retry > 0 and not success:
             try:
-                subtree = GenSubTreeQueryV2(kg.curriculum,
-                                            tree1 + tree2,
+                subtree = GenSubTreeQueryV3(kg.curriculum,
+                                            ancestors,
+                                            subtree,
                                             cache_policy="default",
                                             model=default_model).get_llm_output()
 

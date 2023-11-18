@@ -32,6 +32,13 @@ Should look like
 ----> CONTENT: Key figures and classes involved
 """
 
+GEN_PARAGRAPH_FROM_TREE = """
+Write a detailed paragraph for the following task:
+{context}
+The following subtree details the content of the paragraph:
+{subtree}
+"""
+
 SECTION_EXPANSION_RULE = """
 SECTIONS can hold multiple PARAGRAPHS, not recursively
 --> SECTION:

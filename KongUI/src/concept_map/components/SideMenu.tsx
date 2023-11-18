@@ -8,6 +8,9 @@ import { UseStateDispatch } from "../utils/types";
 import { Node } from "reactflow";
 import styled from 'styled-components';
 import { RFNodeData } from '../../common/common-types';
+import { TreeEditMapContext } from '../provider/TreeEditMapProvider';
+import { useContext } from 'use-context-selector'; 
+import { Button } from "@mui/material";
 
 type SideMenuProps = {
     // what?
@@ -31,6 +34,8 @@ export default function SideMenu(props: SideMenuProps) {
     const { setIsOpen, isOpen } = props;
     console.log("Re-rendering with: ", props.data);
 
+    const { genSubgraphParagraph } = useContext( TreeEditMapContext );
+
     return (
         <div>
             <Drawer
@@ -47,6 +52,7 @@ export default function SideMenu(props: SideMenuProps) {
             <Stack>
                 <TextField
                     value={props.data ? props.data.title : ""}
+                    multiline
                     variant="standard"
                 />
                 <TextField
@@ -56,6 +62,7 @@ export default function SideMenu(props: SideMenuProps) {
                     value={props.data ? props.data.description : ""}
                     variant="standard"
                 />
+                <Button onClick={() => genSubgraphParagraph(props.data.id)}>Generate Paragraph</Button>
             </Stack>
             </Drawer>
         </div>

@@ -166,5 +166,18 @@ export class Backend {
     console.log(data);
     return axios.post(endpoint, data);
   }
+
+  /**
+   * Generates subgraph paragraph
+   */
+  async genSubgraphParagraph(graphId: string, subgraphId: string): Promise<AxiosResponse> {
+    const endpoint = this.url + "/gen/descriptions/subgraph/" + graphId;
+    const data = {
+      model: "gpt3",
+      subgraph_id: subgraphId
+    }
+
+    return axios.post(endpoint, data);
+  }
 }
 

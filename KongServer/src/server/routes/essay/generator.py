@@ -13,8 +13,6 @@ def generate_tree(graph: KnowledgeGraph) -> KnowledgeGraph:
     graph.from_json(tree_json)
     return graph
 
-# def generate_subtree(graph: )
-
 def generate_essay_from_tree(graph: KnowledgeGraph) -> str:
     nodes_details_query = GenEssayFromTree(graph.curriculum, 
                                            graph.display_tree()).get_llm_output()

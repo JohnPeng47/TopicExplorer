@@ -25,3 +25,16 @@ class GenEssayFromTree(BaseLLMQueryV2):
                  model: str = "gpt4"):
         super().__init__(cache_policy=cache_policy, model=model, json_output=False)
         super().init_prompt(GEN_ESSAY_FROM_TREE, context=context, tree=tree)
+
+
+class GenParagraphFromSubtree(BaseLLMQueryV2):
+    """
+    Generate an essay from the subtree outline and context
+    """
+    def __init__(self,
+                 context: str,
+                 subtree: str,
+                 cache_policy: str = "default",
+                 model: str = "gpt3"):
+        super().__init__(cache_policy=cache_policy, model=model, json_output=False)
+        super().init_prompt(GEN_PARAGRAPH_FROM_TREE, context=context, subtree=subtree)

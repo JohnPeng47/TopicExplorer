@@ -1,5 +1,6 @@
 from pydantic import BaseModel
-from typing import Optional, List, Dict
+from typing import Optional, List, Dict, Union
+import enum
 
 class Position(BaseModel):
     x: int
@@ -49,11 +50,21 @@ class CreateGraphRequest(BaseModel):
     title: str
     curriculum: str
 
-class GenSubgraphRequest(BaseModel):
+
+# Generator requests
+
+class OpenAIModel(enum.Enum):
+    gpt3 = "gpt3"
+    gpt4 = "gpt4"
+class GenSubgraphTopicsRequest(BaseModel):
     subgraph: RFNode
 
-class GenSubGraphResponse(BaseModel):
+class GenSubGraphTopicsResponse(BaseModel):
     subgraph: RFNode
+
+class GenParagraphRequest(BaseModel):
+    subgraph_id: str
+    model: OpenAIModel
 
 # TODO: should probably create a KGNode class
 def rfnode_to_kgnode(node: RFNode):

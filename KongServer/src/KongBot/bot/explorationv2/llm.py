@@ -2,10 +2,7 @@ from ..base import BaseLLM
 
 from typing import Dict
 
-from .prompts import CONVERT_TO_JSON, ADD_ROOT_TO_JSON, TREE, TREE_V2, \
-    SUBTREE, SUBTREE_DESCRIPTION_MULTI, SUBTREE_DESCRIPTION_SINGLE, ENTITY_RELATIONS, \
-    SUBTREE_DETAILED_DESCRIPTION, SUBTREE_DETAILED_DESCRIPTION_SCHEMA, SUBTREE_V2, SUBTREE_DETAILED_TEXTBOOK_SINGLE, \
-    KEYWORD_EXTRACTION, SUBTREE_DETAILED_DESCRIPTION_SINGLE_V1
+from .prompts import *
 
 from src.KongBot.bot.adapters import llm_tree_json_adapter
 from src.KongBot.bot.base.query import BaseLLMQuery, BaseLLMQueryV2
@@ -37,11 +34,26 @@ class GenSubTreeQuery(BaseLLMQuery):
 
 
 class GenSubTreeQueryV2(BaseLLMQuery):
+    """
+    Gen sub tree query v2
+    """
     def __init__(self,
                  context: str, subtree: str, cache_policy: str = "default", model: str = "gpt4"):
 
         super().__init__(cache_policy=cache_policy, model=model)
         super().init_prompt(SUBTREE_V2, context=context, subtree=subtree)
+
+
+class GenSubTreeQueryV3(BaseLLMQuery):
+    """
+    Gen sub tree query v3 with greater separation between ancestor and current context
+    """
+    def __init__(self,
+                 context: str, ancestor_tree: str, subtree: str, 
+                 cache_policy: str = "default", model: str = "gpt4"):
+
+        super().__init__(cache_policy=cache_policy, model=model)
+        super().init_prompt(SUBTREE_V3, context=context, ancestor_tree=ancestor_tree, subtree=subtree)
 
 
 class Tree2FlatJSONQuery(BaseLLMQuery):
