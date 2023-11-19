@@ -274,12 +274,13 @@ export class TreeUtils {
   //////////////////////////////////////////////////////////////////////
   public addNode(
     node: Node<RFNodeData>,
-    parentId: NodeID
+    parentId: NodeID,
+    index: number = 0
   ): void {
     if (!this.currentTreeOp)
       this.currentTreeOp = new RFTreeOps(this.getNodes(), this.getEdges());
 
-    this.currentTreeOp.addNode(node, parentId);
+    this.currentTreeOp.addNode(node, parentId, index=index);
   }
 
   public deleteNode(
@@ -323,7 +324,6 @@ export class TreeUtils {
     nodes: Node<RFNodeData>[]): number {
     return nodes.findIndex(node => node.id === nodeId);
   }
-
 
   // UGLY :
   private getNodeDepthV2(

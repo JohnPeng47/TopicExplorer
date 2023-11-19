@@ -28,11 +28,11 @@ export class RFTreeOps {
   }
 
   private addNodeInternal(
-    node: Node<RFNodeData>, parentId: NodeID, rfState: RFState
+    node: Node<RFNodeData>, parentId: NodeID, rfState: RFState, childIndex: number = 0
   ): RFState {
     const [ nodes, edges ] = rfState;
     const index = nodes.findIndex(node => node.id === parentId);
-    const nodeIndex = index + 1;
+    const nodeIndex = index + 1 + childIndex;
 
     const newEdge = CreateEdge({
       target: node.id,
@@ -73,9 +73,10 @@ export class RFTreeOps {
 
   public addNode(
     node: Node<RFNodeData>,
-    parentId: NodeID
+    parentId: NodeID,
+    index: number = 0
   ): void {
-    const rfState = this.addNodeInternal(node, parentId, [this.nodeState, this.edgeState]);
+    const rfState = this.addNodeInternal(node, parentId, [this.nodeState, this.edgeState], index);
     this.setRFState(rfState);
   }
 

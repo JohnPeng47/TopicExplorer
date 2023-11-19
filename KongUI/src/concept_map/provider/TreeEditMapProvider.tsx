@@ -190,10 +190,10 @@ export const TreeEditMapProvider = memo(
             graph.deleteNode(child.id);
           }
         } else {
-          const { savedNodes, savedEdges } = graph.getCollapsedNodes(parentId);
-          for (let node of savedNodes) {
+          const { savedNodes, savedEdges } = graph.getCollapsedNodes(parentId)
+          for (let [index, node] of savedNodes.entries()) {
             const parentId = savedEdges.find(edge => edge.target === node.id).source;
-            graph.addNode(node, parentId);
+            graph.addNode(node, parentId, index);
           }
         }
 
