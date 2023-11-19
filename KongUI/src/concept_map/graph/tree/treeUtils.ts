@@ -258,65 +258,6 @@ export class TreeUtils {
     }
   }
 
-  /**
-   * Adds blank node
-   */
-  // public addNode(id: string): {
-  //   newNodes: Node<RFNodeData>[],
-  //   newEdges: Edge[]
-  // } {
-  //   const currNode = this.getNode(id);
-  //   const currEdge = this.findEdge(id);
-  //   const { 
-  //     beforeNodes,
-  //     beforeEdges,
-  //     afterNodes,
-  //     afterEdges
-  //   } = this.getNodesBeforeAfter(id, 0);
-
-  //   const insertNode = CreateNode({
-  //     data: {
-  //       title: ""
-  //     },
-  //     type: NodeType.TreeNode,
-  //     hidden: false,
-  //     position: {
-  //       x : currNode.position.x,
-  //       y: currNode.position.y
-  //     }
-  //   });
-
-  //   const insertEdge = CreateEdge({
-  //     target: insertNode.id,
-  //     source: this.parent(id).id
-  //   });
-
-  //   const newNodes = beforeNodes
-  //     // we want to swap the order of the nodes
-  //     .concat(insertNode)
-  //     .concat(currNode)
-  //     // .concat(currNode)
-  //     .concat(afterNodes)
-  //     .map((node, index) => ({
-  //       ...node,
-  //       position: {
-  //         x : node.position.x,
-  //         y : index * 70
-  //       }
-  //     })
-  //   );
-
-  //   const newEdges = beforeEdges
-  //     .concat(insertEdge)
-  //     .concat(currEdge)
-  //     .concat(afterEdges);
-
-  //   return {
-  //     newNodes,
-  //     newEdges
-  //   }
-  // }
-
   // REIMPLEMENTATION USING NEW PASS THROUGH METHOD
   /**
    * Primitive operation adds node as the first child to parent

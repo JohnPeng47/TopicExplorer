@@ -159,25 +159,8 @@ export const TreeEditMapProvider = memo(
     )
 
     /**
-     * Add blank node before current node
+     * Add node as the first child of parent
      */
-    // const addNode = useCallback(
-    //   (parentId: string): void => {
-    //     const newNode = CreateNode({
-    //       data: {
-    //         title: ""
-    //       },
-    //       type: NodeType.TreeNode,
-    //       hidden: false
-    //     });
-
-    //     let [ newNodes, newEdges ] = graph.addNode(newNode, parentId, getNodes(), getEdges());
-    //     newNodes = graph.positionNodes(newNodes, newEdges);
-
-    //     changeNodes(newNodes);
-    //     changeEdges(newEdges);
-    // }, [changeNodes, changeEdges]);
-
     const addNode = useCallback(
       (parentId: string): void => {
         const newNode = CreateNode({
@@ -209,6 +192,7 @@ export const TreeEditMapProvider = memo(
         } else {
           const { savedNodes, savedEdges } = graph.getCollapsedNodes(parentId);
           for (let node of savedNodes) {
+            const parentId = savedEdges.find(edge => edge.target === node.id).source;
             graph.addNode(node, parentId);
           }
         }
