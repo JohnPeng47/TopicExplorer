@@ -12,10 +12,10 @@ import {
   useOnSelectionChange,
   useReactFlow, 
   Node,
-  Edge
+  Edge,
 } from "reactflow";
 import { TreeUtils } from "../graph/tree/treeUtils";
-import { RFNodeData } from "../../common/common-types";
+import { RFNodeData, NodeType} from "../../common/common-types";
 import {
   ChangeCounter,
   nextChangeCount,
@@ -23,6 +23,7 @@ import {
   wrapRefChanges,
 } from '../../common/hooks/useChangeCounter';
 
+import { CreateNode } from "../data/processTree";
 import { SetState } from "../../common/common-types";
 
 import { GraphType } from "../data/processNodes";
@@ -157,8 +158,23 @@ export const TreeEditMapProvider = memo(
    * Add blank node before current node
    */
   const addNode = useCallback(
-    (currId: string): void => {
-      const {newNodes, newEdges} = graph.addNode(currId);
+    (parentId: string): void => {
+      const newNode = CreateNode({
+        data: {
+          title: ""
+        },
+        type: NodeType.TreeNode,
+        hidden: false
+      });
+
+      let [
+        newNodes, 
+        newEdges
+      ] = graph.addNode(newNode, parentId, getNodes(), getEdges());
+      newNodes = graph.positionNodes(newNodes);
+    
+      console.log("NEW NODES: ", newNodes);
+      console.log("NEW eGES: ", newEdges);
 
       changeNodes(newNodes);
       changeEdges(newEdges);

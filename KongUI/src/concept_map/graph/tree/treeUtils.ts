@@ -14,6 +14,7 @@ import {
 } from "../../data/processNodes";
 import { CreateNode, CreateEdge } from "../../data/processTree";
 import { NumberLiteralType } from "typescript";
+import { m } from "framer-motion";
 
 type DFSNode = {
   node: BackendNode | Node<RFNodeData>
@@ -256,63 +257,102 @@ export class TreeUtils {
   /**
    * Adds blank node
    */
-  public addNode(id: string): {
-    newNodes: Node<RFNodeData>[],
-    newEdges: Edge[]
-  } {
-    const currNode = this.findNodeRF(id);
-    const currEdge = this.findEdge(id);
-    const { 
-      beforeNodes,
-      beforeEdges,
-      afterNodes,
-      afterEdges
-    } = this.getNodesBeforeAfter(id, 0);
+  // public addNode(id: string): {
+  //   newNodes: Node<RFNodeData>[],
+  //   newEdges: Edge[]
+  // } {
+  //   const currNode = this.findNodeRF(id);
+  //   const currEdge = this.findEdge(id);
+  //   const { 
+  //     beforeNodes,
+  //     beforeEdges,
+  //     afterNodes,
+  //     afterEdges
+  //   } = this.getNodesBeforeAfter(id, 0);
     
-    const insertNode = CreateNode({
-      data: {
-        title: ""
-      },
-      type: NodeType.TreeNode,
-      hidden: false,
-      position: {
-        x : currNode.position.x,
-        y: currNode.position.y
-      }
-    });
+  //   const insertNode = CreateNode({
+  //     data: {
+  //       title: ""
+  //     },
+  //     type: NodeType.TreeNode,
+  //     hidden: false,
+  //     position: {
+  //       x : currNode.position.x,
+  //       y: currNode.position.y
+  //     }
+  //   });
 
-    const insertEdge = CreateEdge({
-      target: insertNode.id,
-      source: this.parent(id).id
-    });
+  //   const insertEdge = CreateEdge({
+  //     target: insertNode.id,
+  //     source: this.parent(id).id
+  //   });
 
-    const newNodes = beforeNodes
-      // we want to swap the order of the nodes
-      .concat(insertNode)
-      .concat(currNode)
-      // .concat(currNode)
-      .concat(afterNodes)
-      .map((node, index) => ({
-        ...node,
-        position: {
-          x : node.position.x,
-          y : index * 70
-        }
-      })
-    );
+  //   const newNodes = beforeNodes
+  //     // we want to swap the order of the nodes
+  //     .concat(insertNode)
+  //     .concat(currNode)
+  //     // .concat(currNode)
+  //     .concat(afterNodes)
+  //     .map((node, index) => ({
+  //       ...node,
+  //       position: {
+  //         x : node.position.x,
+  //         y : index * 70
+  //       }
+  //     })
+  //   );
 
-    const newEdges = beforeEdges
-      .concat(insertEdge)
-      .concat(currEdge)
-      .concat(afterEdges);
+  //   const newEdges = beforeEdges
+  //     .concat(insertEdge)
+  //     .concat(currEdge)
+  //     .concat(afterEdges);
 
-    return {
-      newNodes,
-      newEdges
-    }
+  //   return {
+  //     newNodes,
+  //     newEdges
+  //   }
+  // }
+
+
+  /**
+   * Primitive operation adds node as the first child to parent
+   */
+  public addNode(
+    node: Node<RFNodeData>,
+    parentId: string,
+    oldNodes: Node<RFNodeData>[],
+    oldEdges: Edge[]
+  ): [Node<RFNodeData>[], Edge[]] {
+
+    const index = oldNodes.findIndex(node => node.id === parentId);
+    const nodeIndex = index + 1;
+
+    const newEdge = CreateEdge({
+      target: node.id,
+      source: parentId
+    })
+
+    // we have 
+
+    oldEdges.push(newEdge);
+    oldNodes.splice(nodeIndex, 0, node);
+  
+    return [oldNodes, oldEdges]
   }
 
-
+  public positionNodes(
+    oldNodes: Node<RFNodeData>[],
+  ): Node<RFNodeData>[] 
+  {
+    return oldNodes.map(node => ({
+      ...node,
+      position : {
+        x : this.getNodeDepth(node.id) * this.X_INTERVAL,
+        y : this.getNodeIndex(node.id) * this.Y_INTERVAL
+      }
+    }))
+  }
+  
   /**
    * Collapse nodes
    */
@@ -485,12 +525,24 @@ export class TreeUtils {
   }
 
   /**
-   * Returns all the nodes that come after the currNode
-   * TODO: change this to support collapsed nodes
+   * Returns the current node index in vertical display
    */
   private getNodeIndex(nodeId: NodeID): number {
     return this.getNodes().findIndex(node => node.id === nodeId);
   }
+
+  /**
+   * Returns the current node depth
+   */
+  // private getNodeDepth(nodeId: NodeID): number {
+  //   let depth = 0;
+  //   while (this.parent(nodeId)) {
+  //     depth += 1;
+  //   }
+
+  //   return depth;
+  // }
+
 
   /**
    * Gets the immediate children

@@ -14,7 +14,6 @@ export type GraphType = "Tree" | "ConceptMap";
 export const ConvertNode = (
   node: BackendNode,
 ): Node<RFNodeData> => {
-  // console.log(node.position.x);
   return {
     id: node.id,
     data: {
@@ -61,7 +60,7 @@ export const ConvertEdge = (
 type CreateNodeArg = Omit<RFNode, "id">;
 export const CreateNode = (
   rfNode: CreateNodeArg
-): RFNode => {
+): Node<RFNodeData> => {
   const id = generateUUID();
   console.log("Generating node with id: ", id);
   return {
@@ -71,6 +70,10 @@ export const CreateNode = (
       ...rfNode.data,
       node_type: "treeNode",
       id: id
+    },
+    position : {
+      x : 0,
+      y : 0
     }
   }
 }
