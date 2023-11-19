@@ -317,54 +317,20 @@ export class TreeUtils {
   //   }
   // }
 
-
-
   // REIMPLEMENTATION USING NEW PASS THROUGH METHOD
   /**
    * Primitive operation adds node as the first child to parent
+   * TODO: we should actually be careful since any regular operations 
+   * s.t. getAllChildren can only be called before a TreeOp transaction, since
+   * it does not have access to the internal TreeOp state
+   * 
+   * Solution is to have all read operations first check if there is currentOp
+   * if true, then read from op.state
+   * if not, then read from getNodes()
+   * 
+   * So only mutating ops will trigger a new treeOp to be created
    */
   //////////////////////////////////////////////////////////////////////
-  // private addNode(
-  //   node: Node<RFNodeData>,
-  //   parentId: NodeID,
-  //   nodes: Node<RFNodeData>[],
-  //   edges: Edge[]
-  // ): [Node<RFNodeData>[], Edge[]] {
-
-  //   const index = nodes.findIndex(node => node.id === parentId);
-  //   const nodeIndex = index + 1;
-
-  //   const newEdge = CreateEdge({
-  //     target: node.id,
-  //     source: parentId
-  //   })
-
-  //   edges.push(newEdge);
-  //   nodes.splice(nodeIndex, 0, node);
-
-  //   return [nodes, edges]
-  // }
-
-  // public deleteNode(
-  //   parentID: NodeID,
-  //   nodes: Node<RFNodeData>[],
-  //   edges: Edge[]
-  // ): [Node<RFNodeData>[], Edge[]] {
-
-  //   const {
-  //     childNodes: deleteNodes,
-  //     childEdges: deleteEdges
-  //   } = this.getAllChildren(parentID);
-
-  //   const parentNode = this.getNode(parentID);
-  //   deleteNodes.push(parentNode);
-
-  //   return [
-  //     nodes.filter(node => !deleteNodes.map(delNode => delNode.id).includes(node.id)),
-  //     edges.filter(edge => !deleteEdges.map(delEdge => delEdge.id).includes(edge.id))
-  //   ]
-  // }
-
   public addNode(
     node: Node<RFNodeData>,
     parentId: NodeID
@@ -397,7 +363,6 @@ export class TreeUtils {
 
     return [repoNodes, edges];
   }
-
 
   public positionNodes(
     nodes: Node<RFNodeData>[],
@@ -457,77 +422,6 @@ export class TreeUtils {
     return nodes.find(node => node.id === edge.source);
   }
   ////////////////////////////////////////////////////////////////////////////////////
-
-  /**
-   * Collapse nodes
-   */
-  public collapseNodes(parentId: string, collapsed: boolean): {
-    newNodes: Node<RFNodeData>[],
-    newEdges: Edge[]
-  } {
-    const parentNode = this.getNode(parentId);
-    const parentEdge = this.findEdge(parentId);
-
-    let newNodes = [];
-    let newEdges = [];
-    if (!collapsed) {
-      const { childNodes, childEdges } = this.getAllChildren(parentId);
-
-      this.saveCollapsedNodes(parentId, childNodes, childEdges);
-      const {
-        beforeNodes,
-        beforeEdges,
-        afterNodes,
-        afterEdges
-      } = this.getNodesBeforeAfter(parentId, childNodes.length);
-
-      newNodes = beforeNodes
-        .concat(parentNode)
-        .concat(afterNodes)
-        .map((node, index) => ({
-          ...node,
-          position: {
-            x: node.position.x,
-            y: index * 70
-          }
-        }));
-
-      newEdges = beforeEdges
-        .concat(parentEdge)
-        .concat(afterEdges);
-
-    } else {
-      const { savedNodes, savedEdges } = this.getCollapsedNodes(parentId);
-      const {
-        beforeNodes,
-        beforeEdges,
-        afterNodes,
-        afterEdges
-      } = this.getNodesBeforeAfter(parentId, 0);
-
-      newNodes = beforeNodes
-        .concat(parentNode)
-        .concat(savedNodes)
-        .concat(afterNodes)
-        .map((node, index) => ({
-          ...node,
-          position: {
-            x: node.position.x,
-            y: index * 70
-          }
-        }));
-
-      newEdges = beforeEdges
-        .concat(parentEdge)
-        .concat(savedEdges)
-        .concat(afterEdges);
-    }
-
-    return {
-      newNodes,
-      newEdges
-    }
-  }
 
   /**
    * Returns nodes and edges that came before the current node

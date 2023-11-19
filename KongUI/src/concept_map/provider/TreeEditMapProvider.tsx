@@ -200,7 +200,20 @@ export const TreeEditMapProvider = memo(
      */
     const collapseNodes = useCallback(
       (parentId: string, collapsed: boolean): void => {
-        const { newNodes, newEdges } = graph.collapseNodes(parentId, collapsed);
+        if (!collapsed) {
+          const { childNodes, childEdges } = graph.getAllChildren(parentId);
+          graph.saveCollapsedNodes(parentId, childNodes, childEdges);
+          for (let child of childNodes) {
+            graph.deleteNode(child.id);
+          }
+        } else {
+          const { savedNodes, savedEdges } = graph.getCollapsedNodes(parentId);
+          for (let node of savedNodes) {
+            graph.addNode(node, parentId);
+          }
+        }
+
+        const [newNodes, newEdges] = graph.getRFState();
 
         changeNodes(newNodes);
         changeEdges(newEdges);
