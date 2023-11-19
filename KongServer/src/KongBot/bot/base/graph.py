@@ -406,8 +406,8 @@ class KnowledgeGraph(DiGraph):
 
         parent_node["node_data"]["children"] = []
 
-        for n in super().neighbors(parent_node["id"]):
-            child_node = self.get_node(n)
+        for node_id in sorted(super().neighbors(parent_node["id"])):
+            child_node = self.get_node(node_id)
             parent_node["node_data"]["children"].append(
                 self.to_json(parent_node=child_node, modify_node=modify_node))
 

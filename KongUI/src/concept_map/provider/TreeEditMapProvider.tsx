@@ -80,6 +80,7 @@ export const TreeEditMapProvider = memo(
         // represents the order of nodes in JSON format
         let {newNodes, newEdges} = graph.initJson(res.data, graphType);
         
+        console.log("Downloaded nodes: ", newNodes.map(node => node.data.title));
         changeNodes(newNodes);
         changeEdges(newEdges);
       })

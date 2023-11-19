@@ -47,6 +47,8 @@ def get_graph_metadata_route(user = Depends(get_user_from_token)):
 @router.get("/graph/{graph_id}", response_model=GraphNode)
 def get_graph_route(graph_id: str, 
                     kg: KnowledgeGraph = Depends(get_graph)):
+    print("GETTING GRAPH:")
+    print(kg.to_json_frontend())
     return json.loads(kg.to_json_frontend())
 
 # TODO: Remove graph_id from this function and move delete button on UI to
