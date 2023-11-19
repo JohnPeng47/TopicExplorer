@@ -14,7 +14,7 @@ import {
 } from "../../data/processNodes";
 import { CreateNode, CreateEdge } from "../../data/processTree";
 import { NumberLiteralType } from "typescript";
-import { m } from "framer-motion";
+import { RFTreeOps, RFState } from "./TreeOps";
 
 type DFSNode = {
   node: BackendNode | Node<RFNodeData>
@@ -31,17 +31,19 @@ type NumChildren = number;
 export class TreeUtils {
   private getNodes: () => Node<any>[];
   private getEdges: () => Edge<any>[];
+  private currentTreeOp: RFTreeOps | null;
+
   private X_INTERVAL = 50;
   private Y_INTERVAL = 70;
 
   // Is this consistent with RF getNodes()??
   private nodeDepth: { [NodeID: NodeID]: number };
-  
-  private savedCollapsedNodes: { 
+
+  private savedCollapsedNodes: {
     [parentID: NodeID]: {
       savedNodes: Node<RFNodeData>[],
       savedEdges: Edge[]
-   }
+    }
   };
 
   public constructor(
@@ -52,6 +54,8 @@ export class TreeUtils {
     this.getEdges = getEdges;
     this.nodeDepth = {};
     this.savedCollapsedNodes = {};
+
+    this.currentTreeOp = null;
   }
 
   /**
@@ -152,7 +156,7 @@ export class TreeUtils {
 
     // console.log("server node: ", serverNode);
 
-    const stack: Array<[BackendNode, number, string]> =  [
+    const stack: Array<[BackendNode, number, string]> = [
       [serverNode, this.getNodeDepth(serverNode.id), this.parent(serverNode.id).id]
     ];
     const updatedSubtreeNodes = [];
@@ -186,9 +190,9 @@ export class TreeUtils {
       .concat(afterNodes)
       .map((node, index) => ({
         ...node,
-        position : {
-          x : node.position.x,
-          y : index * this.Y_INTERVAL
+        position: {
+          x: node.position.x,
+          y: index * this.Y_INTERVAL
         }
       }))
 
@@ -208,7 +212,7 @@ export class TreeUtils {
   private numNewNodes(newNode: BackendNode): number {
     let newNodes = 0;
     for (let dfs of this.DFS(newNode)) {
-      if (!this.findNodeRF(dfs.node.id))
+      if (!this.getNode(dfs.node.id))
         newNodes += 1;
     }
 
@@ -222,11 +226,11 @@ export class TreeUtils {
     newNodes: Node<RFNodeData>[],
     newEdges: Edge[]
   } {
-    const node = this.findNodeRF(id);
+    const node = this.getNode(id);
     const { childNodes: children } = this.getAllChildren(id);
     const deleteNodes = [children, node].flat();
     const newNodes = this.getNodes()
-      .filter((node) => 
+      .filter((node) =>
         !deleteNodes
           .map(node => node.id)
           .includes(node.id)
@@ -235,14 +239,14 @@ export class TreeUtils {
         return {
           ...node,
           position: {
-            x : node.position.x,
-            y : index * 70
+            x: node.position.x,
+            y: index * 70
           }
         }
       })
-    
+
     const newEdges = this.getEdges()
-      .filter((edge) => 
+      .filter((edge) =>
         !deleteNodes
           .map(node => node.id)
           .includes(edge.target)
@@ -261,7 +265,7 @@ export class TreeUtils {
   //   newNodes: Node<RFNodeData>[],
   //   newEdges: Edge[]
   // } {
-  //   const currNode = this.findNodeRF(id);
+  //   const currNode = this.getNode(id);
   //   const currEdge = this.findEdge(id);
   //   const { 
   //     beforeNodes,
@@ -269,7 +273,7 @@ export class TreeUtils {
   //     afterNodes,
   //     afterEdges
   //   } = this.getNodesBeforeAfter(id, 0);
-    
+
   //   const insertNode = CreateNode({
   //     data: {
   //       title: ""
@@ -320,67 +324,124 @@ export class TreeUtils {
    * Primitive operation adds node as the first child to parent
    */
   //////////////////////////////////////////////////////////////////////
+  // private addNode(
+  //   node: Node<RFNodeData>,
+  //   parentId: NodeID,
+  //   nodes: Node<RFNodeData>[],
+  //   edges: Edge[]
+  // ): [Node<RFNodeData>[], Edge[]] {
+
+  //   const index = nodes.findIndex(node => node.id === parentId);
+  //   const nodeIndex = index + 1;
+
+  //   const newEdge = CreateEdge({
+  //     target: node.id,
+  //     source: parentId
+  //   })
+
+  //   edges.push(newEdge);
+  //   nodes.splice(nodeIndex, 0, node);
+
+  //   return [nodes, edges]
+  // }
+
+  // public deleteNode(
+  //   parentID: NodeID,
+  //   nodes: Node<RFNodeData>[],
+  //   edges: Edge[]
+  // ): [Node<RFNodeData>[], Edge[]] {
+
+  //   const {
+  //     childNodes: deleteNodes,
+  //     childEdges: deleteEdges
+  //   } = this.getAllChildren(parentID);
+
+  //   const parentNode = this.getNode(parentID);
+  //   deleteNodes.push(parentNode);
+
+  //   return [
+  //     nodes.filter(node => !deleteNodes.map(delNode => delNode.id).includes(node.id)),
+  //     edges.filter(edge => !deleteEdges.map(delEdge => delEdge.id).includes(edge.id))
+  //   ]
+  // }
+
   public addNode(
     node: Node<RFNodeData>,
-    parentId: NodeID,
-    nodes: Node<RFNodeData>[],
-    edges: Edge[]
-  ): [Node<RFNodeData>[], Edge[]] {
+    parentId: NodeID
+  ): void {
+    if (!this.currentTreeOp)
+      this.currentTreeOp = new RFTreeOps(this.getNodes(), this.getEdges());
 
-    const index = nodes.findIndex(node => node.id === parentId);
-    const nodeIndex = index + 1;
-
-    const newEdge = CreateEdge({
-      target: node.id,
-      source: parentId
-    })
-
-    edges.push(newEdge);
-    nodes.splice(nodeIndex, 0, node);
-  
-    return [nodes, edges]
+    this.currentTreeOp.addNode(node, parentId);
   }
+
+  public deleteNode(
+    parentID: NodeID,
+  ): void {
+
+    const { childNodes, childEdges } = this.getAllChildren(parentID);
+    const parentNode = this.getNode(parentID);
+
+    if (!this.currentTreeOp)
+      this.currentTreeOp = new RFTreeOps(this.getNodes(), this.getEdges());
+
+    this.currentTreeOp.deleteNode(parentNode, [childNodes, childEdges])
+  }
+
+  public getRFState(): RFState {
+    const [nodes, edges] = this.currentTreeOp.getRFState();
+    const repoNodes = this.positionNodes(nodes, edges);
+
+    // reset state of current treeOp
+    this.currentTreeOp = null;
+
+    return [repoNodes, edges];
+  }
+
 
   public positionNodes(
     nodes: Node<RFNodeData>[],
     edges: Edge[]
-  ): Node<RFNodeData>[] 
-  {
+  ): Node<RFNodeData>[] {
     return nodes.map(node => ({
       ...node,
-      position : {
-        x : this.getNodeDepthV2(node.id, nodes, edges) * this.X_INTERVAL,
-        y : this.getNodeIndexV2(node.id, nodes) * this.Y_INTERVAL
+      position: {
+        x: this.getNodeDepthV2(node.id, nodes, edges) * this.X_INTERVAL,
+        y: this.getNodeIndexV2(node.id, nodes) * this.Y_INTERVAL
       }
     }))
   }
-  
+
   private getNodeIndexV2(
     nodeId: NodeID,
     nodes: Node<RFNodeData>[]): number {
-      return nodes.findIndex(node => node.id === nodeId ); 
-    }
+    return nodes.findIndex(node => node.id === nodeId);
+  }
 
 
+  // UGLY :
   private getNodeDepthV2(
-    nodeId: NodeID,
+    nodeID: NodeID,
     nodes: Node<RFNodeData>[],
     edges: Edge[],
   ): number {
     let depth = 0;
-    let parent = this.parentV2(nodeId, nodes, edges);
-    
+    if (nodeID === this.root().id)
+      return depth
+
+    depth += 1;
+    let parent = this.parentV2(nodeID, nodes, edges);
     while (parent.id !== this.root().id && depth < 100) {
       depth += 1;
       parent = this.parentV2(parent.id, nodes, edges);
     }
 
-    return depth; 
+    return depth;
   }
 
   private parentV2(
-    nodeId: NodeID, 
-    nodes:Node<RFNodeData>[],
+    nodeId: NodeID,
+    nodes: Node<RFNodeData>[],
     edges: Edge[]
   ): Node<RFNodeData> {
     const edge = edges.find(edge => edge.target === nodeId);
@@ -404,7 +465,7 @@ export class TreeUtils {
     newNodes: Node<RFNodeData>[],
     newEdges: Edge[]
   } {
-    const parentNode = this.findNodeRF(parentId);
+    const parentNode = this.getNode(parentId);
     const parentEdge = this.findEdge(parentId);
 
     let newNodes = [];
@@ -419,21 +480,21 @@ export class TreeUtils {
         afterNodes,
         afterEdges
       } = this.getNodesBeforeAfter(parentId, childNodes.length);
-      
+
       newNodes = beforeNodes
         .concat(parentNode)
         .concat(afterNodes)
         .map((node, index) => ({
           ...node,
           position: {
-            x : node.position.x,
-            y : index * 70
+            x: node.position.x,
+            y: index * 70
           }
         }));
 
       newEdges = beforeEdges
-          .concat(parentEdge)
-          .concat(afterEdges);
+        .concat(parentEdge)
+        .concat(afterEdges);
 
     } else {
       const { savedNodes, savedEdges } = this.getCollapsedNodes(parentId);
@@ -443,7 +504,7 @@ export class TreeUtils {
         afterNodes,
         afterEdges
       } = this.getNodesBeforeAfter(parentId, 0);
-      
+
       newNodes = beforeNodes
         .concat(parentNode)
         .concat(savedNodes)
@@ -451,15 +512,15 @@ export class TreeUtils {
         .map((node, index) => ({
           ...node,
           position: {
-            x : node.position.x,
-            y : index * 70
+            x: node.position.x,
+            y: index * 70
           }
         }));
 
       newEdges = beforeEdges
-          .concat(parentEdge)
-          .concat(savedEdges)
-          .concat(afterEdges);
+        .concat(parentEdge)
+        .concat(savedEdges)
+        .concat(afterEdges);
     }
 
     return {
@@ -508,8 +569,7 @@ export class TreeUtils {
   /**
    * Restore collapsed nodes and edges
    */
-  public getCollapsedNodes(parentId: NodeID):
-  {
+  public getCollapsedNodes(parentId: NodeID): {
     savedNodes: Node<RFNodeData>[],
     savedEdges: Edge[]
   } {
@@ -612,8 +672,8 @@ export class TreeUtils {
    */
   public getAllChildren(nodeId: string): {
     childNodes: Node<RFNodeData>[],
-    childEdges: Edge[] 
-  } {    
+    childEdges: Edge[]
+  } {
     return {
       childNodes: this.children(nodeId).flatMap(child => {
         return [child, ...this.getAllChildren(child.id).childNodes];
@@ -637,7 +697,7 @@ export class TreeUtils {
    * Returns node by ID using GetNodes
    * Theoretically, both method should be consistent but still
    */
-  public findNodeRF(nodeId: string): Node<RFNodeData> | undefined {
+  private getNode(nodeId: string): Node<RFNodeData> | undefined {
     return this.getNodes()
       .find((node) => node.id === nodeId)
   }
@@ -659,7 +719,7 @@ export class TreeUtils {
   public RFtoJSON(node: Node<RFNodeData>): any;
   public RFtoJSON(node: any): any {
     if (typeof node === 'string') {
-      node = this.findNodeRF(node);
+      node = this.getNode(node);
       if (!node) {
         throw Error(`Node id: {node} does not exist`)
       }
@@ -709,7 +769,7 @@ export class TreeUtils {
       return this.root();
     }
 
-    return this.findNodeRF(edgeFromParent.source);
+    return this.getNode(edgeFromParent.source);
   }
 }
 
