@@ -33,18 +33,17 @@ def ascii_tree_to_kg_v2(tree: str, subtree_og: Dict, parent_node: Dict):
     # the case where we have multiple roots and subtree_og has a parent (ie. not the root node)
     if roots > 1:
         if parent_node:
-            root_id, root_title = parent_node["id"], parent_node["node_data"]["title"]
+            root_node = parent_node
         else:
             raise GeneratorException(
                 f"No parent but generated multiple parents, tree: {tree}"
             )
     else:
         # this effectively handles both case where LLM generated tree starts at 1 or 0
-        root_id, root_title = subtree_og["id"], subtree_og["node_data"]["title"]
+        root_node = subtree_og
         start_depth, _ = data[0]
         if start_depth == 0:
             data.pop(0)
-
         # need to realign depths so they all start at zero because we rely on strict 0-based
         # array indexing to determine depth level
         for i, (depth, title) in enumerate(data):
@@ -53,32 +52,20 @@ def ascii_tree_to_kg_v2(tree: str, subtree_og: Dict, parent_node: Dict):
             if depth - 1 < 0:
                 raise GeneratorException(
                     f"Index below zero after re-align: {tree}")
-
-    root_node = {
-        "id": root_id,
-        "node_data": {
-            "title": root_title,
-            "children": [],
-            "node_type": "TREE_NODE",
-            "description": ""
-        }
-    }
-
+            
     level_index = [root_node["node_data"]["children"]]
     for depth, title in data:
-        node_id = find_id(subtree_og, title)
-        if not node_id:
-            node_id = str(uuid.uuid4())
-
-        node = {
-            "id": node_id,
-            "node_data": {
-                "title": title,
-                "children": [],
-                "node_type": "TREE_NODE",
-                "description": ""
+        node = find_node(subtree_og, title)
+        if not node:
+            node = {
+                "id": str(uuid.uuid4()),
+                "node_data": {
+                    "title": title,
+                    "children": [],
+                    "node_type": "TREE_NODE",
+                    "description": ""
+                }
             }
-        }
 
         # Add the new node to the appropriate parent's children
         level_index[depth].append(node)
@@ -92,13 +79,13 @@ def ascii_tree_to_kg_v2(tree: str, subtree_og: Dict, parent_node: Dict):
     return root_node
 
 
-def find_id(node: Dict, title: str):
+def find_node(node: Dict, title: str):
     if node["node_data"]["title"] == title:
-        return node["id"]
+        return node
 
     for child in node["node_data"]["children"]:
-        id = find_id(child, title)
-        if id:
-            return id
+        node = find_node(child, title)
+        if node:
+            return node
 
     return None

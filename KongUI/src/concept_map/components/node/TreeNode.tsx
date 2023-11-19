@@ -150,7 +150,6 @@ function TreeNode({ data, isConnectable, selected, xPos, yPos, openSideMenu}: Tr
           <TextField
             id="text"
             name="text"
-            label="Text"
             variant="outlined"
             onChange={handleInputChange}
             fullWidth
