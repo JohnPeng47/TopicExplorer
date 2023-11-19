@@ -171,7 +171,8 @@ export const TreeEditMapProvider = memo(
         newNodes, 
         newEdges
       ] = graph.addNode(newNode, parentId, getNodes(), getEdges());
-      newNodes = graph.positionNodes(newNodes);
+      
+      newNodes = graph.positionNodes(newNodes, newEdges);
     
       console.log("NEW NODES: ", newNodes);
       console.log("NEW eGES: ", newEdges);

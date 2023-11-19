@@ -314,17 +314,20 @@ export class TreeUtils {
   // }
 
 
+
+  // REIMPLEMENTATION USING NEW PASS THROUGH METHOD
   /**
    * Primitive operation adds node as the first child to parent
    */
+  //////////////////////////////////////////////////////////////////////
   public addNode(
     node: Node<RFNodeData>,
-    parentId: string,
-    oldNodes: Node<RFNodeData>[],
-    oldEdges: Edge[]
+    parentId: NodeID,
+    nodes: Node<RFNodeData>[],
+    edges: Edge[]
   ): [Node<RFNodeData>[], Edge[]] {
 
-    const index = oldNodes.findIndex(node => node.id === parentId);
+    const index = nodes.findIndex(node => node.id === parentId);
     const nodeIndex = index + 1;
 
     const newEdge = CreateEdge({
@@ -332,27 +335,68 @@ export class TreeUtils {
       source: parentId
     })
 
-    // we have 
-
-    oldEdges.push(newEdge);
-    oldNodes.splice(nodeIndex, 0, node);
+    edges.push(newEdge);
+    nodes.splice(nodeIndex, 0, node);
   
-    return [oldNodes, oldEdges]
+    return [nodes, edges]
   }
 
   public positionNodes(
-    oldNodes: Node<RFNodeData>[],
+    nodes: Node<RFNodeData>[],
+    edges: Edge[]
   ): Node<RFNodeData>[] 
   {
-    return oldNodes.map(node => ({
+    return nodes.map(node => ({
       ...node,
       position : {
-        x : this.getNodeDepth(node.id) * this.X_INTERVAL,
-        y : this.getNodeIndex(node.id) * this.Y_INTERVAL
+        x : this.getNodeDepthV2(node.id, nodes, edges) * this.X_INTERVAL,
+        y : this.getNodeIndexV2(node.id, nodes) * this.Y_INTERVAL
       }
     }))
   }
   
+  private getNodeIndexV2(
+    nodeId: NodeID,
+    nodes: Node<RFNodeData>[]): number {
+      return nodes.findIndex(node => node.id === nodeId ); 
+    }
+
+
+  private getNodeDepthV2(
+    nodeId: NodeID,
+    nodes: Node<RFNodeData>[],
+    edges: Edge[],
+  ): number {
+    let depth = 0;
+    let parent = this.parentV2(nodeId, nodes, edges);
+    
+    while (parent.id !== this.root().id && depth < 100) {
+      depth += 1;
+      parent = this.parentV2(parent.id, nodes, edges);
+    }
+
+    return depth; 
+  }
+
+  private parentV2(
+    nodeId: NodeID, 
+    nodes:Node<RFNodeData>[],
+    edges: Edge[]
+  ): Node<RFNodeData> {
+    const edge = edges.find(edge => edge.target === nodeId);
+
+    // TODO: IMPORTANT => technically this could stil throw an error if 
+    // our root node changes
+    if (!edge && nodeId !== this.root().id) {
+      throw Error("Node does not have parent, OR you are trying to replace root")
+    } else if (nodeId === this.root().id) {
+      return this.root();
+    }
+
+    return nodes.find(node => node.id === edge.source);
+  }
+  ////////////////////////////////////////////////////////////////////////////////////
+
   /**
    * Collapse nodes
    */
@@ -659,8 +703,9 @@ export class TreeUtils {
       // TODO: there issue around deleting root
       .find((edge) => edge.target === nodeId);
 
-    if (!edgeFromParent) {
-      // only way this should fail if nodeId is rootId
+    if (!edgeFromParent && nodeId !== this.root().id) {
+      throw Error("Node does not have parent, impossible")
+    } else if (nodeId === this.root().id) {
       return this.root();
     }
 
