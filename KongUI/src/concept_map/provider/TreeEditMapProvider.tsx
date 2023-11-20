@@ -23,7 +23,7 @@ import {
   wrapRefChanges,
 } from '../../common/hooks/useChangeCounter';
 
-import { CreateNode } from "../data/processTree";
+import { CreateNode, CreateEdge } from "../data/processTree";
 import { SetState } from "../../common/common-types";
 
 import { GraphType } from "../data/processNodes";
@@ -42,6 +42,8 @@ interface TreeEditMap {
   collapseNodes: (parentId: string, expand: boolean) => void;
   addNode: (parentId: string) => void;
   genSubgraphParagraph: (subgraphId: string) => Promise<AxiosResponse>;
+  displayDescriptionNodes: () => void;
+  restoreNodes: () => void;
   nodesWithoutDescr: number;
 }
 
@@ -82,7 +84,7 @@ export const TreeEditMapProvider = memo(
           // represents the order of nodes in JSON format
           let { newNodes, newEdges } = graph.initJson(res.data, graphType);
 
-          console.log("Downloaded nodes: ", newNodes.map(node => node.data.title));
+          console.log("Downloaded nodes: ", newNodes.map(node => node.data.node_type));
           changeNodes(newNodes);
           changeEdges(newEdges);
         })
@@ -165,7 +167,8 @@ export const TreeEditMapProvider = memo(
       (parentId: string): void => {
         const newNode = CreateNode({
           data: {
-            title: ""
+            title: "",
+            node_type: NodeType.TreeNode,
           },
           type: NodeType.TreeNode,
           hidden: false
@@ -178,6 +181,43 @@ export const TreeEditMapProvider = memo(
         changeEdges(newEdges);
       }, [changeNodes, changeEdges]);
 
+
+    const [savedNodes, setSaveNodes] = useState<Node<RFNodeData>[]>([]);
+    const [savedEdges, setSaveEdges] = useState<Edge<RFNodeData>[]>([]);
+
+    /**
+     * Show only node types that match the filter
+     */
+    const displayDescriptionNodes = useCallback(
+      (): void => {
+        setSaveNodes(getNodes());
+        setSaveEdges(getEdges());
+
+        const rootID = getNodes()[0].id;
+        let newNodes: Node<RFNodeData>[] = getNodes()
+          .filter(node => node.data.description || node.data.node_type === "ROOT");
+        
+        const newEdges = []
+        for(const node of newNodes) {
+          newEdges.push(CreateEdge({source: rootID, target: node.id}));
+        }
+
+        newNodes = graph.positionNodes(newNodes, newEdges);
+
+        setNodes(newNodes);
+        setEdges(newEdges);
+      }, [setNodes, setEdges]);
+
+    /**
+     * Show only node types that match the filter
+     */
+    const restoreNodes = useCallback((): void => {
+      setNodes(savedNodes);
+      setEdges(savedEdges);
+      setSaveNodes([]);
+      setSaveEdges([]);
+    }, [setNodes, setEdges, savedNodes])
+
     /**
      * Hides all children nodes
      */
@@ -185,12 +225,12 @@ export const TreeEditMapProvider = memo(
       (parentId: string, collapsed: boolean): void => {
         if (!collapsed) {
           const { childNodes, childEdges } = graph.getAllChildren(parentId);
-          graph.saveCollapsedNodes(parentId, childNodes, childEdges);
+          graph.saveHiddenNodes(parentId, childNodes, childEdges);
           for (let child of childNodes) {
             graph.deleteNode(child.id);
           }
         } else {
-          const { savedNodes, savedEdges } = graph.getCollapsedNodes(parentId)
+          const { savedNodes, savedEdges } = graph.getHiddendNodes(parentId)
           for (let [index, node] of savedNodes.entries()) {
             const parentId = savedEdges.find(edge => edge.target === node.id).source;
             graph.addNode(node, parentId, index);
@@ -199,9 +239,9 @@ export const TreeEditMapProvider = memo(
 
         const [newNodes, newEdges] = graph.getRFState();
 
-        changeNodes(newNodes);
-        changeEdges(newEdges);
-      }, [changeNodes, changeEdges]);
+        setNodes(newNodes);
+        setEdges(newEdges);
+      }, [setNodes, setEdges]);
 
 
     /**
@@ -322,6 +362,8 @@ export const TreeEditMapProvider = memo(
       collapseNodes,
       addNode,
       genSubgraphParagraph,
+      displayDescriptionNodes,
+      restoreNodes,
       nodesWithoutDescr: nodesWithoutDescr.current
     });
 

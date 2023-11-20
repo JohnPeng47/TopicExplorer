@@ -21,12 +21,17 @@ function TreeEditMapPage() {
   const [ initialized, setInitialized ] = useState(false);
   const [ sideMenuOpen, setSideMenuOpen ] = useState(false);
   const [ sideMenuData, setSideMenuData ] = useState<RFNodeData | null>(null);
+  const [ displayPgNodes, setdisplayPgNodes ] = useState(false);
 
   const { mapId } = useParams();
 
   const [nodes, setNodes] = useNodesState([]);
   const [edges, setEdges] = useEdgesState([]);
-  const { downloadGraph } = useContext(TreeEditMapContext);
+  const { 
+    downloadGraph,
+    displayDescriptionNodes,
+    restoreNodes
+  } = useContext(TreeEditMapContext);
 
   if (!initialized) {
     downloadGraph(mapId, "Tree");
@@ -76,6 +81,24 @@ function TreeEditMapPage() {
         }}>
         <QuizIcon />
       </Fab>
+      <Fab color="primary" aria-label="add" 
+        onClick={() => {
+          if (displayPgNodes) {
+            restoreNodes();
+            setdisplayPgNodes(false);
+          } else {
+            displayDescriptionNodes();
+            setdisplayPgNodes(true);
+          }
+        }}
+        sx={{
+         position: 'fixed', 
+         bottom: 100, 
+         left: 70,
+        }}>
+        <QuizIcon />
+      </Fab>
+
       <SideMenu
         data={sideMenuData}
         isOpen={sideMenuOpen} 

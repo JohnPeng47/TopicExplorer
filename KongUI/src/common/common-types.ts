@@ -29,7 +29,7 @@ export type BackendNode = {
 
 export type BackendNodeData = {
   title: string;
-  node_type?: string;
+  node_type: string;
   children?: BackendNode[];
   concept?: string;
   description?: string;

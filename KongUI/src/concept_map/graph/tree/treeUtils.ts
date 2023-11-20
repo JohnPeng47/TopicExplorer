@@ -39,7 +39,7 @@ export class TreeUtils {
   // Is this consistent with RF getNodes()??
   private nodeDepth: { [NodeID: NodeID]: number };
 
-  private savedCollapsedNodes: {
+  private hiddenNodes: {
     [parentID: NodeID]: {
       savedNodes: Node<RFNodeData>[],
       savedEdges: Edge[]
@@ -53,7 +53,7 @@ export class TreeUtils {
     this.getNodes = getNodes;
     this.getEdges = getEdges;
     this.nodeDepth = {};
-    this.savedCollapsedNodes = {};
+    this.hiddenNodes = {};
 
     this.currentTreeOp = null;
   }
@@ -280,7 +280,7 @@ export class TreeUtils {
     if (!this.currentTreeOp)
       this.currentTreeOp = new RFTreeOps(this.getNodes(), this.getEdges());
 
-    this.currentTreeOp.addNode(node, parentId, index=index);
+    this.currentTreeOp.addNode(node, parentId, index);
   }
 
   public deleteNode(
@@ -394,8 +394,8 @@ export class TreeUtils {
   /**
    * Save collapse nodes and edges
    */
-  public saveCollapsedNodes(parentId: NodeID, nodes: Node<RFNodeData>[], edges: Edge[]): void {
-    this.savedCollapsedNodes[parentId] = {
+  public saveHiddenNodes(parentId: NodeID, nodes: Node<RFNodeData>[], edges: Edge[]): void {
+    this.hiddenNodes[parentId] = {
       savedNodes: nodes,
       savedEdges: edges
     }
@@ -404,12 +404,12 @@ export class TreeUtils {
   /**
    * Restore collapsed nodes and edges
    */
-  public getCollapsedNodes(parentId: NodeID): {
+  public getHiddendNodes(parentId: NodeID): {
     savedNodes: Node<RFNodeData>[],
     savedEdges: Edge[]
   } {
-    const savedNodes = this.savedCollapsedNodes[parentId];
-    delete this.savedCollapsedNodes[parentId];
+    const savedNodes = this.hiddenNodes[parentId];
+    delete this.hiddenNodes[parentId];
 
     return savedNodes;
   }
