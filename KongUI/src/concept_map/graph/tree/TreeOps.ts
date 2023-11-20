@@ -31,6 +31,12 @@ export class RFTreeOps {
     node: Node<RFNodeData>, parentId: NodeID, rfState: RFState, childIndex: number = 0
   ): RFState {
     const [ nodes, edges ] = rfState;
+    // root node 
+    if (!parentId) {
+      nodes.push(node)
+      return [ nodes, edges ]
+    }
+    
     const index = nodes.findIndex(node => node.id === parentId);
     const nodeIndex = index + 1 + childIndex;
 

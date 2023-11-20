@@ -194,25 +194,23 @@ export const TreeEditMapProvider = memo(
       (): void => {
         setSaveNodes(getNodes());
         setSaveEdges(getEdges());
+        
+        const rootNode = getNodes()[0];
+        const pgNodes = getNodes()
+          .filter(node => node.data.description)
+          .map(node => ({
+            ...node,
+            type: NodeType.TextContentNode
+          }))
 
-        const rootID = getNodes()[0].id;
-        let newNodes: Node<RFNodeData>[] = getNodes()
-          .filter(node => node.data.description || node.data.node_type === "ROOT")
-          
-        for(let node of newNodes) {
-          if (node.data.node_type !== "ROOT") {
-            node.type = NodeType.TextContentNode
-          }
+        graph.deleteNode(rootNode.id);
+        graph.addNode(rootNode, null, 0);
+        // add rootNode as parent for now
+        for(let [index, node] of pgNodes.entries()) {
+          graph.addNode(node, rootNode.id, index);
         }
 
-        const newEdges = []
-        for(const node of newNodes) {
-          newEdges.push(CreateEdge({source: rootID, target: node.id}));
-        }
-
-        // console.log("New nodes:", newNodes.map(node => ));
-        newNodes = graph.positionNodes(newNodes, newEdges);
-
+        const [newNodes, newEdges] = graph.getRFState();
         setNodes(newNodes);
         setEdges(newEdges);
       }, [setNodes, setEdges]);
