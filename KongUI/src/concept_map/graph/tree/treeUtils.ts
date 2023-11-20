@@ -121,8 +121,6 @@ export class TreeUtils {
       //node has not been seen by us before
       newNodes.push(rfNode);
 
-      // save node positions/depths/order
-      this.updateNodeState(currNode.id, depth, nodeIndex);
 
       // all nodes not root
       if (parentId !== currNode.id)
@@ -206,57 +204,6 @@ export class TreeUtils {
     }
   }
 
-  /**
-   * Finds the new nodes being added recursively
-   */
-  private numNewNodes(newNode: BackendNode): number {
-    let newNodes = 0;
-    for (let dfs of this.DFS(newNode)) {
-      if (!this.getNode(dfs.node.id))
-        newNodes += 1;
-    }
-
-    return newNodes;
-  }
-
-  /**
-   * Delete node and their children
-   */
-  public deleteNodes(id: string): {
-    newNodes: Node<RFNodeData>[],
-    newEdges: Edge[]
-  } {
-    const node = this.getNode(id);
-    const { childNodes: children } = this.getAllChildren(id);
-    const deleteNodes = [children, node].flat();
-    const newNodes = this.getNodes()
-      .filter((node) =>
-        !deleteNodes
-          .map(node => node.id)
-          .includes(node.id)
-      )
-      .map((node, index) => {
-        return {
-          ...node,
-          position: {
-            x: node.position.x,
-            y: index * 70
-          }
-        }
-      })
-
-    const newEdges = this.getEdges()
-      .filter((edge) =>
-        !deleteNodes
-          .map(node => node.id)
-          .includes(edge.target)
-      )
-
-    return {
-      newNodes,
-      newEdges
-    }
-  }
 
   // REIMPLEMENTATION USING NEW PASS THROUGH METHOD
   /**
@@ -424,20 +371,6 @@ export class TreeUtils {
       y: this.Y_INTERVAL * nodeIndex
     }
     return position;
-  }
-
-  /**
-   * Updates internal node depth and node index
-   * TODO: handle case when update is root node
-   */
-  private updateNodeState(
-    nodeId: NodeID,
-    depth: number,
-    nodeIndex: number
-  ): void {
-    this.nodeDepth[nodeId] = depth;
-    // this actually 
-    // this.nodeIndices[nodeId] = nodeIndex;
   }
 
   /**

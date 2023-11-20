@@ -9,6 +9,7 @@ import ReactFlow, {
 } from "reactflow";
 import { useParams } from "react-router-dom";
 import TreeNode from "../concept_map/components/node/TreeNode";
+import TextContentNode from "../concept_map/components/node/TextContentNode";
 import { Fab } from "@mui/material";
 import QuizIcon from "@mui/icons-material/Add";
 import { TreeEditMapContext, TreeEditMapProvider } from "../concept_map/provider/TreeEditMapProvider";
@@ -55,6 +56,7 @@ function TreeEditMapPage() {
   const nodeTypeWithSideMenu = useMemo(
     () => ({
         treeNode: addPropsToRFNode(TreeNode, {  openSideMenu: openSideMenu }),
+        textContentNode: TextContentNode
     }), [] 
   );
 

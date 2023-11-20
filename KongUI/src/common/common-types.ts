@@ -75,7 +75,8 @@ export type RFEdge = {
 export enum NodeType {
   AttachedNode = "attachedNode",
   UnattachedNode = "unattachedNode",
-  TreeNode = "treeNode"
+  TreeNode = "treeNode",
+  TextContentNode = "textContentNode"
 }
 
 const COLORS = [

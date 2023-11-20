@@ -62,7 +62,6 @@ export const CreateNode = (
   rfNode: CreateNodeArg
 ): Node<RFNodeData> => {
   const id = generateUUID();
-  console.log("Generating node with id: ", id);
   return {
     ...rfNode,
     id: id,

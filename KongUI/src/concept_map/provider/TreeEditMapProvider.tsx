@@ -65,6 +65,8 @@ export const TreeEditMapProvider = memo(
 
     let nodesWithoutDescr = useRef<number>(0);
 
+    console.log("Node: ", getNodes().map(node => node.type));
+
     const graph = useRef(new TreeUtils(getNodes, getEdges)).current;
     const setNodesRef = useRef<SetState<Node<any>[]>>(setNodes);
     const setEdgeRef = useRef<SetState<Edge<any>[]>>(setEdges);
@@ -93,6 +95,7 @@ export const TreeEditMapProvider = memo(
           throw error;
         })
     }
+
 
     // maybe this should go into graph utils, since this generic to all nodes
     const modifyNode = useCallback(
@@ -184,7 +187,6 @@ export const TreeEditMapProvider = memo(
 
     const [savedNodes, setSaveNodes] = useState<Node<RFNodeData>[]>([]);
     const [savedEdges, setSaveEdges] = useState<Edge<RFNodeData>[]>([]);
-
     /**
      * Show only node types that match the filter
      */
@@ -195,13 +197,20 @@ export const TreeEditMapProvider = memo(
 
         const rootID = getNodes()[0].id;
         let newNodes: Node<RFNodeData>[] = getNodes()
-          .filter(node => node.data.description || node.data.node_type === "ROOT");
-        
+          .filter(node => node.data.description || node.data.node_type === "ROOT")
+          
+        for(let node of newNodes) {
+          if (node.data.node_type !== "ROOT") {
+            node.type = NodeType.TextContentNode
+          }
+        }
+
         const newEdges = []
         for(const node of newNodes) {
           newEdges.push(CreateEdge({source: rootID, target: node.id}));
         }
 
+        // console.log("New nodes:", newNodes.map(node => ));
         newNodes = graph.positionNodes(newNodes, newEdges);
 
         setNodes(newNodes);
