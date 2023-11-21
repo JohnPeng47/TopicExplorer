@@ -53,9 +53,6 @@ class CreateGraphRequest(BaseModel):
 
 # Generator requests
 
-class OpenAIModel(enum.Enum):
-    gpt3 = "gpt3"
-    gpt4 = "gpt4"
 class GenSubgraphTopicsRequest(BaseModel):
     subgraph: RFNode
 
@@ -64,7 +61,7 @@ class GenSubGraphTopicsResponse(BaseModel):
 
 class GenParagraphRequest(BaseModel):
     subgraph_id: str
-    model: OpenAIModel
+    model: str
 
 # TODO: should probably create a KGNode class
 def rfnode_to_kgnode(node: RFNode):

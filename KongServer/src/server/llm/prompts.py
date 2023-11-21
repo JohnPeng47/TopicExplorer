@@ -33,10 +33,18 @@ Should look like
 """
 
 GEN_PARAGRAPH_FROM_TREE = """
-Write a detailed paragraph for the following task:
-{context}
-The following subtree details the content of the paragraph:
-{subtree}
+You are given a tree, generate a textbook entry from it. Here are some requirements:
+- Dense Facts: Should contain explicit references to maximum facts
+- Terse: Prose terse
+- No Section headings
+- Generated entry should be as long as possible
+- No adjectives
+
+Here is the framing context. One sentence should be generated to connect the main content
+to the context:
+{ancestor_context}
+Here is the topic for the main content. Dedicate most of the paragraph to this:
+{main_topic}
 """
 
 SUBTREE_V3 = """

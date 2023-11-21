@@ -32,12 +32,12 @@ class GenParagraphFromSubtree(BaseLLMQueryV2):
     Generate an essay from the subtree outline and context
     """
     def __init__(self,
-                 context: str,
-                 subtree: str,
+                 ancestor_context: str,
+                 main_topic: str,
                  cache_policy: str = "default",
                  model: str = "gpt3"):
         super().__init__(cache_policy=cache_policy, model=model, json_output=False)
-        super().init_prompt(GEN_PARAGRAPH_FROM_TREE, context=context, subtree=subtree)
+        super().init_prompt(GEN_PARAGRAPH_FROM_TREE, ancestor_context=ancestor_context, main_topic=main_topic)
 
 class GenSubTreeQueryV3(BaseLLMQuery):
     """

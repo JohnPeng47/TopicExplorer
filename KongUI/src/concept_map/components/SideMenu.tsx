@@ -4,6 +4,7 @@ import List from '@mui/material/List';
 import TextField from '@mui/material/TextField';
 import { IconButton, Stack } from '@mui/material';
 
+import { RadioGroup, Radio, FormControlLabel, FormControl, FormLabel } from '@mui/material';
 import { useState } from 'react';
 import { AlertBoxContext } from '../../common/provider/AlertBoxProvider';
 import { UseStateDispatch } from "../utils/types";
@@ -42,6 +43,7 @@ const DrawerHeader = styled('div')(({ theme }) => ({
 export default function SideMenu(props: SideMenuProps) {
   const data: RFNodeData = props.data;
 
+  const [model, setModel] = useState('gpt3');
   const { setIsOpen, isOpen } = props;
   const { 
     genSubgraphParagraph,
@@ -53,13 +55,17 @@ export default function SideMenu(props: SideMenuProps) {
   // dialog box control
   const [dialogOpen, setDialogOpen] = useState(false);
 
-  const SideMenuButtons = (): JSX.Element => {
+  const SideMenuBtns = (): JSX.Element => {
+    const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+      setModel((event.target as HTMLInputElement).value);
+    };
+  
     return (
       <Stack direction={"row"}>
         <Box>
           <Button color="primary" onClick={() => {
             setGenPgLoading(true);
-            genSubgraphParagraph(data.id).then((_) => {
+            genSubgraphParagraph(data.id, model).then((_) => {
               console.log("Finished generating!");
               sendToast("Finished generating!", "success");
             }).catch((err) => {
@@ -76,6 +82,21 @@ export default function SideMenu(props: SideMenuProps) {
           }}>
             Delete Paragraph
           </Button>
+        </Box>
+        <Box>
+          <FormControl>
+            <FormLabel id="demo-controlled-radio-buttons-group">Model</FormLabel>
+            <RadioGroup
+              row={true}
+              aria-labelledby="demo-controlled-radio-buttons-group"
+              name="controlled-radio-buttons-group"
+              value={model}
+              onChange={handleChange}
+            >
+              <FormControlLabel value="gpt3" control={<Radio />} label="gpt3" />
+              <FormControlLabel value="gpt4" control={<Radio />} label="gpt4" />
+            </RadioGroup>
+          </FormControl>
         </Box>
         <Box
           paddingLeft={1}
@@ -127,7 +148,7 @@ export default function SideMenu(props: SideMenuProps) {
               } 
             }
           />
-          <SideMenuButtons></SideMenuButtons>
+          <SideMenuBtns></SideMenuBtns>
         </Stack>
 
         <Dialog open={dialogOpen} onClose={() =>{ setDialogOpen(false) }} maxWidth="md" fullWidth>

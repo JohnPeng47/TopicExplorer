@@ -170,10 +170,10 @@ export class Backend {
   /**
    * Generates subgraph paragraph
    */
-  async genSubgraphParagraph(graphId: string, subgraphId: string): Promise<AxiosResponse> {
+  async genSubgraphParagraph(graphId: string, subgraphId: string, model: string): Promise<AxiosResponse> {
     const endpoint = this.url + "/gen/descriptions/subgraph/" + graphId;
     const data = {
-      model: "gpt3",
+      model: model,
       subgraph_id: subgraphId
     }
 

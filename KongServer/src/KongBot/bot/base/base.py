@@ -60,7 +60,7 @@ class BaseLLM:
         elif model == "gpt4":
             self.openai_model = gpt4
         else:
-            raise Exception(f"Requested mode: {self.model} does not exist")
+            raise Exception(f"Requested mode: {model} does not exist")
 
         self.cache_policy = cache_policy
         self.json_output = json_output

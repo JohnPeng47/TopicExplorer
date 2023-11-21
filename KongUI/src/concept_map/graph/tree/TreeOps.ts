@@ -52,7 +52,7 @@ export class RFTreeOps {
     nodes.splice(nodeIndex, 0, node);
     console.log(`NodeIndex: ${nodeIndex}, parentIndex: ${parentIndex}, childIndex: ${childIndex}`);
     console.log(`Adding node: ${node.data.title} at ${nodeIndex}`);
-    console.log("Nodes: ", nodes.map(node => node.data.title));
+    // console.log("Nodes: ", nodes.map(node => node.data.title));
   
     return [ nodes, edges ] 
   }

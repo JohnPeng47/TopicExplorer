@@ -42,7 +42,7 @@ interface TreeEditMap {
   genGraphDesc: (graphId: string) => Promise<AxiosResponse>;
   collapseNodes: (parentId: string, expand: boolean) => void;
   addNode: (parentId: string) => void;
-  genSubgraphParagraph: (subgraphId: string) => Promise<AxiosResponse>;
+  genSubgraphParagraph: (subgraphId: string, model: string) => Promise<AxiosResponse>;
   displayDescriptionNodes: () => void;
   restoreNodes: () => void;
   nodesWithoutDescr: number;
@@ -262,6 +262,8 @@ export const TreeEditMapProvider = memo(
           let seen_nodes = 0;
           let curr_children = 0;
           let lastParentId = parentId;
+          // keeps track of which child index the parent has finished adding
+          // let parentChildIndex = [{ id: parentId, index: 0 }];
           for (let [index, child] of savedNodes.entries()) {
             let currParentId = savedEdges.find(edge => edge.target === child.id).source;
             if (currParentId !== lastParentId) {
@@ -269,7 +271,7 @@ export const TreeEditMapProvider = memo(
               curr_children = 0;
               lastParentId = currParentId;
             }
-            console.log("Adding node: ", child.data.title);
+            // console.log("Adding node: ", child.data.title);
             graph.addNode(child, currParentId, index - seen_nodes);
             curr_children += 1;
           }
@@ -360,11 +362,11 @@ export const TreeEditMapProvider = memo(
       return backend.genGraphDesc(graphId);
     }
 
-    const genSubgraphParagraph = (subgraphId: string): Promise<AxiosResponse> => {
+    const genSubgraphParagraph = (subgraphId: string, model: string): Promise<AxiosResponse> => {
       const rootId = getNodes()[0].id;
 
       return new Promise((resolve, reject) => {
-        backend.genSubgraphParagraph(rootId, subgraphId).then((res) => {
+        backend.genSubgraphParagraph(rootId, subgraphId, model).then((res) => {
           const {
             newNodes,
             newEdges

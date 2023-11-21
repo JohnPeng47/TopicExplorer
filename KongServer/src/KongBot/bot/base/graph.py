@@ -504,10 +504,8 @@ class KnowledgeGraph(DiGraph):
 
         ancestors_tree += "SUBTREE\n--------\n"
         tree_tree += self.display_tree_v2(node)
-        # need this for pre-conditioning the LLM response
-        first_line = tree_tree.split("\n")[0]
 
-        return ancestors_tree, tree_tree, first_line
+        return ancestors_tree, tree_tree, node["node_data"]["title"]
 
     # need to write adapter
     def display_tree_v2(self,

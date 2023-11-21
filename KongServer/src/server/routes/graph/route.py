@@ -189,13 +189,15 @@ def get_tree_router(
                             request: GenParagraphRequest = Body(...)):
         subgraph_id, model = request.subgraph_id, request.model
         kg = graph_manager.get_graph(graph_id)
-        subtree = kg.display_tree(subgraph_id, lineage=True)
+        ancestor_tree, subtree, curr_title = kg.display_tree_v2_lineage(subgraph_id)
         context = kg.curriculum
 
         print("Context: ", kg.curriculum)
+        print("Ancestor tree: ", ancestor_tree)
         print("Subtree: ", subtree)
+        print("Title: ", curr_title)
 
-        paragraph = GenParagraphFromSubtree(context, subtree).get_llm_output()
+        paragraph = GenParagraphFromSubtree(ancestor_tree + subtree, curr_title, model=request.model).get_llm_output()
         kg.modify_node(subgraph_id, {
             "description" : paragraph
         })
