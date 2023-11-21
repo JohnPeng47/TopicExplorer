@@ -28,7 +28,10 @@ export class RFTreeOps {
   }
 
   private addNodeInternal(
-    node: Node<RFNodeData>, parentId: NodeID, rfState: RFState, childIndex: number = 0
+    node: Node<RFNodeData>, 
+    parentId: NodeID, 
+    rfState: RFState, 
+    childIndex: number = 0
   ): RFState {
     const [ nodes, edges ] = rfState;
     // root node 
@@ -37,8 +40,8 @@ export class RFTreeOps {
       return [ nodes, edges ]
     }
     
-    const index = nodes.findIndex(node => node.id === parentId);
-    const nodeIndex = index + 1 + childIndex;
+    const parentIndex = nodes.findIndex(node => node.id === parentId);
+    const nodeIndex = parentIndex + 1 + childIndex;
 
     const newEdge = CreateEdge({
       target: node.id,
@@ -47,6 +50,9 @@ export class RFTreeOps {
 
     edges.push(newEdge);
     nodes.splice(nodeIndex, 0, node);
+    console.log(`NodeIndex: ${nodeIndex}, parentIndex: ${parentIndex}, childIndex: ${childIndex}`);
+    console.log(`Adding node: ${node.data.title} at ${nodeIndex}`);
+    console.log("Nodes: ", nodes.map(node => node.data.title));
   
     return [ nodes, edges ] 
   }

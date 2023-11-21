@@ -13,8 +13,14 @@ import { RFNodeData } from '../../common/common-types';
 import { TreeEditMapContext } from '../provider/TreeEditMapProvider';
 import { useContext } from 'use-context-selector';
 import { Button } from "@mui/material";
-import { CircularProgress } from "@mui/material";
+import { 
+  CircularProgress,
+  Dialog,
+  DialogContent,
+} from "@mui/material";
 import { Box } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
+
 
 type SideMenuProps = {
   // what?
@@ -37,11 +43,17 @@ export default function SideMenu(props: SideMenuProps) {
   const data: RFNodeData = props.data;
 
   const { setIsOpen, isOpen } = props;
-  const { genSubgraphParagraph } = useContext(TreeEditMapContext);
+  const { 
+    genSubgraphParagraph,
+    modifyNodeDescr
+  } = useContext(TreeEditMapContext);
   const { sendToast } = useContext(AlertBoxContext);
   const [GenPgLoading, setGenPgLoading] = useState<boolean>(false);
 
-  const GenGraphPgBtn = (): JSX.Element => {
+  // dialog box control
+  const [dialogOpen, setDialogOpen] = useState(false);
+
+  const SideMenuButtons = (): JSX.Element => {
     return (
       <Stack direction={"row"}>
         <Box>
@@ -58,6 +70,11 @@ export default function SideMenu(props: SideMenuProps) {
           }
           }>
             Generate Paragraph
+          </Button>
+          <Button name="deletePg" color="error" onClick={() => {
+            modifyNodeDescr(data.id, "");
+          }}>
+            Delete Paragraph
           </Button>
         </Box>
         <Box
@@ -103,9 +120,32 @@ export default function SideMenu(props: SideMenuProps) {
             rows={8}
             value={props.data ? props.data.description : ""}
             variant="outlined"
+            // ADD THE POP DIALOG CALLBACK HERE
+            onClick={
+              () => {
+                setDialogOpen(true);
+              } 
+            }
           />
-          <GenGraphPgBtn></GenGraphPgBtn>
+          <SideMenuButtons></SideMenuButtons>
         </Stack>
+
+        <Dialog open={dialogOpen} onClose={() =>{ setDialogOpen(false) }} maxWidth="md" fullWidth>
+          <DialogContent>
+            <IconButton onClick={() => {setDialogOpen(false) }} style={{ position: 'absolute', right: '0', top: '0' }}>
+              <CloseIcon />
+            </IconButton>
+            <TextField
+              autoFocus
+              multiline
+              rows={10}
+              value={props.data ? props.data.description : ""}
+              variant="outlined"
+              fullWidth
+            />
+          </DialogContent>
+        </Dialog>
+
       </Drawer>
     </div>
   );

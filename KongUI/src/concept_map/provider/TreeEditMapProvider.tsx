@@ -36,6 +36,7 @@ interface TreeEditMap {
   downloadGraph: (graphID: string, graphType: GraphType) => void;
   genSubGraph: (nodeId: string) => Promise<AxiosResponse>;
   modifyNodeTitle: (nodeId: string, newTitle: string) => void;
+  modifyNodeDescr: (nodeId: string, newDescr: string) => void;
   deleteNode: (nodeId: string) => void;
   saveGraph: (title: string) => void;
   genGraphDesc: (graphId: string) => Promise<AxiosResponse>;
@@ -151,6 +152,23 @@ export const TreeEditMapProvider = memo(
     )
 
     /**
+     * Modifies the node description
+     */
+    const modifyNodeDescr = useCallback(
+      (id: string, newTitle: string): void => {
+        modifyNode(id, (old) => {
+          return {
+            ...old,
+            data: {
+              ...old.data,
+              description: newTitle
+            }
+          }
+        })
+      }, [modifyNode]
+    )
+
+    /**
      * Deletes node and all its children as well as repositioning
      */
     const deleteNode = useCallback(
@@ -238,9 +256,22 @@ export const TreeEditMapProvider = memo(
           }
         } else {
           const { savedNodes, savedEdges } = graph.getHiddendNodes(parentId)
-          for (let [index, node] of savedNodes.entries()) {
-            const parentId = savedEdges.find(edge => edge.target === node.id).source;
-            graph.addNode(node, parentId, index);
+          // for(let n of savedNodes) {
+          //   console.log("Adding node: ", n.data.title);
+          // }
+          let seen_nodes = 0;
+          let curr_children = 0;
+          let lastParentId = parentId;
+          for (let [index, child] of savedNodes.entries()) {
+            let currParentId = savedEdges.find(edge => edge.target === child.id).source;
+            if (currParentId !== lastParentId) {
+              seen_nodes += curr_children;
+              curr_children = 0;
+              lastParentId = currParentId;
+            }
+            console.log("Adding node: ", child.data.title);
+            graph.addNode(child, currParentId, index - seen_nodes);
+            curr_children += 1;
           }
         }
 
@@ -364,6 +395,7 @@ export const TreeEditMapProvider = memo(
       genSubGraph,
       deleteNode,
       modifyNodeTitle,
+      modifyNodeDescr,
       saveGraph,
       genGraphDesc,
       collapseNodes,

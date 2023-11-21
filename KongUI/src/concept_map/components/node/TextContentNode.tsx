@@ -23,6 +23,7 @@ export default function TextContentNode({ data, isConnectable, selected }: TextC
   const [showPopup, setShowPopup] = useState(false);
   const [GenTopicsLoading, setGenTopicsLoading] = useState<boolean>(false);
 
+
   return (
     <div style={{ display: 'flex', alignItems: 'center' }}>
       <Handle type="target" position={Position.Left} isConnectable={isConnectable} />
@@ -39,12 +40,12 @@ export default function TextContentNode({ data, isConnectable, selected }: TextC
           border: "black"
         }}>
           <TextField
+            sx={{lineHeight: 200}}
             label={data.title}
             variant="outlined"
             multiline
             fullWidth
             defaultValue={data.description}
-          // Allow the text field to grow as needed
           >
           </TextField>
           <Box sx={{

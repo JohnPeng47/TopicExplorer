@@ -15,6 +15,7 @@ import {
 import { CreateNode, CreateEdge } from "../../data/processTree";
 import { NumberLiteralType } from "typescript";
 import { RFTreeOps, RFState } from "./TreeOps";
+import { getBoxHeight } from "../../components/node/helper";
 
 type DFSNode = {
   node: BackendNode | Node<RFNodeData>
@@ -245,7 +246,15 @@ export class TreeUtils {
 
   public getRFState(): RFState {
     const [nodes, edges] = this.currentTreeOp.getRFState();
-    const repoNodes = this.positionNodes(nodes, edges);
+    // TODO: ideally we make this decision little more robust
+    const treeNodes = nodes.filter(node => node.type === NodeType.TextContentNode).length > 0 
+      ? false : true;
+    
+    console.log(">>>>>>>TreeNodes: ", treeNodes);
+    const repoNodes = treeNodes 
+      ? this.positionNodes(nodes, edges) : this.positionNodesV2(nodes, edges);
+
+    // const repoNodes =  this.positionNodesV2(nodes, edges);
 
     // reset state of current treeOp
     this.currentTreeOp = null;
@@ -264,6 +273,29 @@ export class TreeUtils {
         y: this.getNodeIndexV2(node.id, nodes) * this.Y_INTERVAL
       }
     }))
+  }
+
+  public positionNodesV2(
+    nodes: Node<RFNodeData>[],
+    edges: Edge[]
+  ): Node<RFNodeData>[] {
+    let offset = 0
+    let prevBoxHeight = 0;
+    return nodes.map((node, index) => {
+      console.log("Height: ", node.height);
+      console.log("Calc height: ", getBoxHeight(node.data));
+      console.log("PREV: ", prevBoxHeight);
+      console.log("Offset: ", offset);
+      offset = index === 0 ? 0 : offset + getBoxHeight(node.data)/2 + prevBoxHeight/2;
+      prevBoxHeight = getBoxHeight(node.data);
+      return {
+        ...node,
+        position: {
+          x: this.getNodeDepthV2(node.id, nodes, edges) * this.X_INTERVAL,
+          y: offset
+        }
+      }
+    })
   }
 
   private getNodeIndexV2(

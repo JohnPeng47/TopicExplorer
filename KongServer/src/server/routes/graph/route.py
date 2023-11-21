@@ -34,7 +34,7 @@ router = APIRouter()
 @router.get("/metadata/", 
             response_model=List[GraphMetadataResp])
 # def get_graph_metadata(user = Depends(get_user_from_token)):
-def get_graph_metadata_route(user = Depends(get_user_from_token)):
+def get_graph_metadata_route():
     metadata_list = []
     # consider returning a cursor here to be more memory efficient
     # although the pagination limit should do the trick?
