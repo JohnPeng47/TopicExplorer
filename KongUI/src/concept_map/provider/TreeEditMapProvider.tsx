@@ -246,6 +246,43 @@ export const TreeEditMapProvider = memo(
     /**
      * Hides all children nodes
      */
+    // const collapseNodes = useCallback(
+    //   (parentId: string, collapsed: boolean): void => {
+    //     if (!collapsed) {
+    //       const { childNodes, childEdges } = graph.getAllChildren(parentId);
+    //       graph.saveHiddenNodes(parentId, childNodes, childEdges);
+    //       for (let child of childNodes) {
+    //         graph.deleteNode(child.id);
+    //       }
+    //     } else {
+    //       const { savedNodes, savedEdges } = graph.getHiddendNodes(parentId)
+    //       // for(let n of savedNodes) {
+    //       //   console.log("Adding node: ", n.data.title);
+    //       // }
+    //       let seen_nodes = 0;
+    //       let curr_children = 0;
+    //       let lastParentId = parentId;
+    //       // keeps track of which child index the parent has finished adding
+    //       // let parentChildIndex = [{ id: parentId, index: 0 }];
+    //       for (let [index, child] of savedNodes.entries()) {
+    //         let currParentId = savedEdges.find(edge => edge.target === child.id).source;
+    //         if (currParentId !== lastParentId) {
+    //           seen_nodes += curr_children;
+    //           curr_children = 0;
+    //           lastParentId = currParentId;
+    //         }
+    //         // console.log("Adding node: ", child.data.title);
+    //         graph.addNode(child, currParentId, index - seen_nodes);
+    //         curr_children += 1;
+    //       }
+    //     }
+
+    //     const [newNodes, newEdges] = graph.getRFState();
+
+    //     setNodes(newNodes);
+    //     setEdges(newEdges);
+    //   }, [setNodes, setEdges]);
+
     const collapseNodes = useCallback(
       (parentId: string, collapsed: boolean): void => {
         if (!collapsed) {
@@ -256,33 +293,36 @@ export const TreeEditMapProvider = memo(
           }
         } else {
           const { savedNodes, savedEdges } = graph.getHiddendNodes(parentId)
-          // for(let n of savedNodes) {
-          //   console.log("Adding node: ", n.data.title);
-          // }
-          let seen_nodes = 0;
-          let curr_children = 0;
-          let lastParentId = parentId;
-          // keeps track of which child index the parent has finished adding
-          // let parentChildIndex = [{ id: parentId, index: 0 }];
-          for (let [index, child] of savedNodes.entries()) {
+          let parentChildren = {};
+          // index relative to first child of parent
+          for (let child of savedNodes) {
             let currParentId = savedEdges.find(edge => edge.target === child.id).source;
-            if (currParentId !== lastParentId) {
-              seen_nodes += curr_children;
-              curr_children = 0;
-              lastParentId = currParentId;
+            let siblings = parentChildren[currParentId];
+            let childIndex = 0;
+
+            if (!siblings) {
+              parentChildren[currParentId] = [child.id];
+            } else {
+              childIndex += siblings.length;
+              for (let child of siblings) {
+                const { childNodes } = graph.allChildren(child);
+                
+                childIndex += childNodes.length;
+              } 
             }
-            // console.log("Adding node: ", child.data.title);
-            graph.addNode(child, currParentId, index - seen_nodes);
-            curr_children += 1;
+            // need to add to this the number of children of nodes that came before it
+            // TODO: can we track current parentIndex in addNode
+            graph.addNode(child, currParentId, childIndex);
           }
+          console.log("Parent child index: ", parentChildren);
         }
 
         const [newNodes, newEdges] = graph.getRFState();
+        console.log("NewNodes: ", newNodes.map(node => node.data.title));
 
         setNodes(newNodes);
         setEdges(newEdges);
       }, [setNodes, setEdges]);
-
 
     /**
      * Listen for de-selection due to generate paragraph, and re-select node

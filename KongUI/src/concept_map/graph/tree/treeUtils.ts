@@ -298,6 +298,13 @@ export class TreeUtils {
     })
   }
 
+  public allChildren(nodeId: NodeID): {
+    childNodes: Node<RFNodeData>[],
+    childEdges: Edge[]
+  } {
+    return this.currentTreeOp.allChildren(nodeId);
+  }
+
   private getNodeIndexV2(
     nodeId: NodeID,
     nodes: Node<RFNodeData>[]): number {

@@ -51,7 +51,7 @@ export class RFTreeOps {
     edges.push(newEdge);
     nodes.splice(nodeIndex, 0, node);
     console.log(`NodeIndex: ${nodeIndex}, parentIndex: ${parentIndex}, childIndex: ${childIndex}`);
-    console.log(`Adding node: ${node.data.title} at ${nodeIndex}`);
+    // console.log(`Adding node: ${node.data.title} at ${nodeIndex}`);
     // console.log("Nodes: ", nodes.map(node => node.data.title));
   
     return [ nodes, edges ] 
@@ -82,7 +82,6 @@ export class RFTreeOps {
     this.setRFState(rfState);
   }
 
-
   public addNode(
     node: Node<RFNodeData>,
     parentId: NodeID,
@@ -103,5 +102,30 @@ export class RFTreeOps {
       this.nodeState, 
       this.edgeState
     ]
+  }
+
+  public allChildren(nodeId: NodeID): {
+    childNodes: Node<RFNodeData>[],
+    childEdges: Edge[]
+  } {
+    return {
+      childNodes: this.children(nodeId).flatMap(child => {
+        return [child, ...this.allChildren(child.id).childNodes];
+      }),
+      childEdges: this.children(nodeId).flatMap(child => {
+        return [this.edgeState.find(edge => edge.target === child.id), ...this.allChildren(child.id).childEdges]
+      })
+    }
+
+  }
+
+  public children(node: NodeID): Node<RFNodeData>[] {
+    // RFNode
+    const nodeId = node;
+    const childIds = this.edgeState
+      .filter(edge => edge.source === nodeId)
+      .map(edge => edge.target)
+
+    return this.nodeState.filter(node => childIds.includes(node.id));
   }
 }
