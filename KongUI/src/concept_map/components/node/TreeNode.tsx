@@ -97,27 +97,6 @@ function TreeNode({ data, isConnectable, selected, xPos, yPos, openSideMenu}: Tr
       </Button>
     );
   }
-
-  function GenGraphTopicsBtn(): JSX.Element {
-    return <Button sx={{
-      width: 100,            // Set a specific width for the button
-      marginLeft: 1            // Optional: add a little spacing between the TextField and Button
-    }} variant="contained" color="primary" onClick={() =>  {
-        setGenTopicsLoading(true);
-        genSubGraph(data.id).then((_) => {
-          sendToast("Finished generating!", "success");
-          setNavToMap(false);
-        }).catch((err) => {
-          sendToast(`Server error: ${err}`, "success");
-          // Success
-        }).finally(() => {
-          setGenTopicsLoading(false);
-        })
-      }
-    }>
-      Re-generate
-    </Button>
-  }
   
   function NavToMapBtn() { 
     return (
@@ -201,8 +180,6 @@ function TreeNode({ data, isConnectable, selected, xPos, yPos, openSideMenu}: Tr
             }>
               <CloseIconOutlined ></CloseIconOutlined>
             </IconButton>
-
-            <GenGraphTopicsBtn></GenGraphTopicsBtn>
           </Stack>
 
           {

@@ -59,10 +59,14 @@ export class Backend {
    */
   genSubGraph(
     subgraph: Node<RFNodeData>,
-    graphId: string): Promise<AxiosResponse> {
+    graphId: string,
+    model: string,
+    llmInstr: string): Promise<AxiosResponse> {
     const endpoint = this.url + `/gen/v2/subgraph/${graphId}`;
     const data = {
-      subgraph: subgraph
+      subgraph: subgraph,
+      model: model,
+      llmInstr: llmInstr
     }
 
     return axios.post(endpoint, data);
@@ -170,11 +174,12 @@ export class Backend {
   /**
    * Generates subgraph paragraph
    */
-  async genSubgraphParagraph(graphId: string, subgraphId: string, model: string): Promise<AxiosResponse> {
+  async genSubgraphParagraph(graphId: string, subgraphId: string, model: string, llmInstr: string): Promise<AxiosResponse> {
     const endpoint = this.url + "/gen/descriptions/subgraph/" + graphId;
     const data = {
       model: model,
-      subgraph_id: subgraphId
+      subgraph_id: subgraphId,
+      llmInstr: llmInstr
     }
 
     return axios.post(endpoint, data);

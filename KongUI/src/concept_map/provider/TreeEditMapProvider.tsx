@@ -31,10 +31,10 @@ import { BackendContext } from "./backendProvider";
 import { AxiosResponse } from "axios";
 
 import { RFTreeOps } from "../graph/tree/TreeOps";
+import { LocalMall } from "@mui/icons-material";
 
 interface TreeEditMap {
   downloadGraph: (graphID: string, graphType: GraphType) => void;
-  genSubGraph: (nodeId: string) => Promise<AxiosResponse>;
   modifyNodeTitle: (nodeId: string, newTitle: string) => void;
   modifyNodeDescr: (nodeId: string, newDescr: string) => void;
   deleteNode: (nodeId: string) => void;
@@ -42,7 +42,8 @@ interface TreeEditMap {
   genGraphDesc: (graphId: string) => Promise<AxiosResponse>;
   collapseNodes: (parentId: string, expand: boolean) => void;
   addNode: (parentId: string) => void;
-  genSubgraphParagraph: (subgraphId: string, model: string) => Promise<AxiosResponse>;
+  genSubgraphParagraph: (subgraphId: string, model: string, llmInstr: string) => Promise<AxiosResponse>;
+  genSubGraph: (nodeId: string, model: string, llmInstr: string) => Promise<AxiosResponse>;
   displayDescriptionNodes: () => void;
   restoreNodes: () => void;
   nodesWithoutDescr: number;
@@ -370,13 +371,13 @@ export const TreeEditMapProvider = memo(
     /**
      * Syncs graph with updated node 
      */
-    const genSubGraph = (nodeId: string): Promise<AxiosResponse> => {
+    const genSubGraph = (nodeId: string, model: string, llmInstr: string): Promise<AxiosResponse> => {
       return new Promise((resolve, reject) => {
         const subgraph = graph.RFtoJSON(nodeId);
         const rootId = getNodes()[0].id;
         console.log("Subgraph: ", subgraph);
 
-        backend.genSubGraph(subgraph, rootId)
+        backend.genSubGraph(subgraph, rootId, model, llmInstr)
           .then((res) => {
             const {
               newNodes,
@@ -402,11 +403,11 @@ export const TreeEditMapProvider = memo(
       return backend.genGraphDesc(graphId);
     }
 
-    const genSubgraphParagraph = (subgraphId: string, model: string): Promise<AxiosResponse> => {
+    const genSubgraphParagraph = (subgraphId: string, model: string, llmInstr: string): Promise<AxiosResponse> => {
       const rootId = getNodes()[0].id;
 
       return new Promise((resolve, reject) => {
-        backend.genSubgraphParagraph(rootId, subgraphId, model).then((res) => {
+        backend.genSubgraphParagraph(rootId, subgraphId, model, llmInstr).then((res) => {
           const {
             newNodes,
             newEdges

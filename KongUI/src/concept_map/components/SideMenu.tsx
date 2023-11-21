@@ -47,7 +47,8 @@ export default function SideMenu(props: SideMenuProps) {
   const { setIsOpen, isOpen } = props;
   const { 
     genSubgraphParagraph,
-    modifyNodeDescr
+    modifyNodeDescr,
+    genSubGraph
   } = useContext(TreeEditMapContext);
   const { sendToast } = useContext(AlertBoxContext);
   const [GenPgLoading, setGenPgLoading] = useState<boolean>(false);
@@ -55,17 +56,50 @@ export default function SideMenu(props: SideMenuProps) {
   // dialog box control
   const [dialogOpen, setDialogOpen] = useState(false);
 
+  function GenGraphTopicsBtn(): JSX.Element {
+    const [ loading, setLoading] = useState<boolean>(false);
+    return (
+      <Stack direction="row">
+        <Button color="primary" onClick={() =>  {
+            setLoading(true);
+            genSubGraph(data.id, model, "").then((_) => {
+              sendToast("Finished generating!", "success");
+            }).catch((err) => {
+              sendToast(`Server error: ${err}`, "success");
+              // Success
+            }).finally(() => {
+              setLoading(false);
+            })
+          }
+        }>
+          Re-generate
+        </Button>
+        <Box
+          paddingLeft={1}
+          paddingTop={1}>
+          {loading && <CircularProgress size={20} />}
+        </Box>
+      </Stack>
+    )
+  }
+
   const SideMenuBtns = (): JSX.Element => {
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
       setModel((event.target as HTMLInputElement).value);
     };
   
     return (
-      <Stack direction={"row"}>
+      <Stack direction={"column"}>
         <Box>
+          <Button name="deletePg" color="error" onClick={() => {
+              setDialogOpen(true);
+            }}>
+            Show Paragraph
+          </Button>
+
           <Button color="primary" onClick={() => {
             setGenPgLoading(true);
-            genSubgraphParagraph(data.id, model).then((_) => {
+            genSubgraphParagraph(data.id, model, "").then((_) => {
               console.log("Finished generating!");
               sendToast("Finished generating!", "success");
             }).catch((err) => {
@@ -78,11 +112,12 @@ export default function SideMenu(props: SideMenuProps) {
             Generate Paragraph
           </Button>
           <Button name="deletePg" color="error" onClick={() => {
-            modifyNodeDescr(data.id, "");
-          }}>
+              modifyNodeDescr(data.id, "");
+            }}>
             Delete Paragraph
           </Button>
         </Box>
+        <GenGraphTopicsBtn></GenGraphTopicsBtn>
         <Box>
           <FormControl>
             <FormLabel id="demo-controlled-radio-buttons-group">Model</FormLabel>
@@ -139,14 +174,7 @@ export default function SideMenu(props: SideMenuProps) {
             multiline
             color="secondary"
             rows={8}
-            value={props.data ? props.data.description : ""}
             variant="outlined"
-            // ADD THE POP DIALOG CALLBACK HERE
-            onClick={
-              () => {
-                setDialogOpen(true);
-              } 
-            }
           />
           <SideMenuBtns></SideMenuBtns>
         </Stack>
