@@ -44,8 +44,11 @@ class GenSubTreeQueryV3(BaseLLMQuery):
     Gen sub tree query v3 with greater separation between ancestor and current context
     """
     def __init__(self,
-                 context: str, ancestor_tree: str, subtree: str, 
+                 context: str, 
+                 ancestor_tree: str, 
+                 subtree: str, 
+                 llm_instr: str,
                  cache_policy: str = "default", model: str = "gpt4"):
 
         super().__init__(cache_policy=cache_policy, model=model)
-        super().init_prompt(SUBTREE_V3, context=context, ancestor_tree=ancestor_tree, subtree=subtree)
+        super().init_prompt(SUBTREE_V3, context=context, ancestor_tree=ancestor_tree, subtree=subtree, llm_instr=llm_instr)

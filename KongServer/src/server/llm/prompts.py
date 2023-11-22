@@ -33,18 +33,21 @@ Should look like
 """
 
 GEN_PARAGRAPH_FROM_TREE = """
-You are given a tree, generate a textbook entry from it. Here are some requirements:
-- Dense Facts: Should contain explicit references to maximum facts
-- Terse: Prose terse
-- No Section headings
-- Generated entry should be as long as possible
-- No adjectives
+You are given a tree, generate a Wikipedia entry for it
 
 Here is the framing context. One sentence should be generated to connect the main content
 to the context:
 {ancestor_context}
+
 Here is the topic for the main content. Dedicate most of the paragraph to this:
 {main_topic}
+
+Here are some requirements:
+- Dense Facts: Should contain explicit references to maximum facts
+- Terse: Prose terse
+- No Section headings
+- Generated entry should be in the style of wikipedia                        
+Now go generate it:
 """
 
 SUBTREE_V3 = """
@@ -77,12 +80,14 @@ The new output would be:
 [3] Disseminating propaganda among workers and peasants
 [3] Promoting political awareness and activism
 
+{llm_instr}
+
 Here is the ANCESTOR context:
 {ancestor_tree}
 ======================
-Here is the subtree. Focus generation on subtree:
-{subtree}
 
+Here is the subtree. Focus generation on subtree, but frame it in the context of the ancestor context:
+{subtree}
 """
 
 #### Expansion Rules ####

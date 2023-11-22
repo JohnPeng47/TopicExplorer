@@ -4,7 +4,7 @@ import src.KongBot.bot.explorationv2.generators.generators as GENERATORS
 #     generate_details_hierarchal, generate_keywords
 from src.KongBot.bot.explorationv2.llm import GenSubTreeQuery, Tree2FlatJSONQuery, GenSubTreeQueryV2
 from src.KongBot.bot.adapters import ascii_tree_to_kg
-from src.KongBot.bot.essay_gen.generator import generate_tree
+# from src.KongBot.bot.essay_gen.generator import generate_tree
 
 context = """
 Generate something about the origin of electronic music. Focus on the history techno
@@ -85,8 +85,5 @@ config = {
 
 import json
 
-data = open("test/KongServer/data/data.json", 'r')
-data = json.loads(data.read())
-kg = KnowledgeGraph("Attaturk and the origins of the modern Turkish State")
-kg.from_json(data)
-print(kg.display_tree("cc2f7a97-bb67-4a88-90f3-358e843f426c", lineage=True))
+kg = KnowledgeGraph.load_graph("ba6c9182-9c0e-498e-b95c-e68e44b0598e")
+print(kg.display_tree())

@@ -9,6 +9,11 @@ from logging import getLogger
 
 logger = getLogger("base")
 
+LLM_INSTR_PRE = """
+Apply the following additional insructions to generating the subtree:
+{}
+"""
+
 def generate_tree(graph: KnowledgeGraph) -> KnowledgeGraph:
     config = graph.config["gen_tree_essay"]
     tree = GenTree(graph.curriculum, **config).get_llm_output()
@@ -20,15 +25,18 @@ def generate_tree(graph: KnowledgeGraph) -> KnowledgeGraph:
 
 def generate_subtree(graph: KnowledgeGraph, 
                      subgrah_id: str,
+                     llm_instr: str,
                      model: OpenAIModel = "gpt3") -> KnowledgeGraph:
     ancestors, subtree, _ = graph.display_tree_v2_lineage(subgrah_id)
     subgraph_json = graph.get_node(subgrah_id)
     retry, success = 6, False
     while retry > 0 and not success:
         try:
+            llm_instr = LLM_INSTR_PRE.format(llm_instr) if llm_instr else ""
             subtree = GenSubTreeQueryV3(graph.curriculum,
                                         ancestors,
                                         subtree,
+                                        llm_instr,
                                         cache_policy="default",
                                         model=model).get_llm_output()
 

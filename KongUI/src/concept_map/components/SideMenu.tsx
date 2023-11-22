@@ -22,6 +22,8 @@ import {
 import { Box } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 
+import { handleChangeEvent } from '../../common/utils';
+
 
 type SideMenuProps = {
   // what?
@@ -42,8 +44,9 @@ const DrawerHeader = styled('div')(({ theme }) => ({
 
 export default function SideMenu(props: SideMenuProps) {
   const data: RFNodeData = props.data;
-
   const [model, setModel] = useState('gpt3');
+  const [llmInstr, setLlmInstr] = useState<string>("");
+
   const { setIsOpen, isOpen } = props;
   const { 
     genSubgraphParagraph,
@@ -62,7 +65,8 @@ export default function SideMenu(props: SideMenuProps) {
       <Stack direction="row">
         <Button color="primary" onClick={() =>  {
             setLoading(true);
-            genSubGraph(data.id, model, "").then((_) => {
+            console.log("Generating topics with: ", llmInstr);
+            genSubGraph(data.id, model, llmInstr).then((_) => {
               sendToast("Finished generating!", "success");
             }).catch((err) => {
               sendToast(`Server error: ${err}`, "success");
@@ -175,6 +179,7 @@ export default function SideMenu(props: SideMenuProps) {
             color="secondary"
             rows={8}
             variant="outlined"
+            onChange={e => {handleChangeEvent(e, setLlmInstr)}}
           />
           <SideMenuBtns></SideMenuBtns>
         </Stack>

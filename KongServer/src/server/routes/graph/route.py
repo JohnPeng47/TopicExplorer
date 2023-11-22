@@ -243,7 +243,7 @@ def get_tree_router(
                 content = json.loads(kg.to_json_frontend(node=old_node))
             )
         
-        kg = generate_subtree(kg, rf_subgraph_json["id"])
+        kg = generate_subtree(kg, rf_subgraph_json["id"], request.llmInstr, model=request.model)
         
         subtree_node_new = kg.get_node(rf_subgraph_json["id"])
         kg.add_node(subtree_node_new, merge=True)
