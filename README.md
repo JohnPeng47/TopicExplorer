@@ -4,6 +4,7 @@ Expand the tree conditioned on the previous branches
 ![image](https://github.com/user-attachments/assets/22ab6103-14eb-4fc8-af9a-587ea9e494be)
 
 Edit branches to guide generation
+
 ![image](https://github.com/user-attachments/assets/f90608ac-287a-4b77-8624-28a4dc1da581)
 
 The main novelty here is that generating tree branches is done through a single prompt and using its ancestor branches as context
