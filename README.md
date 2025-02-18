@@ -1,11 +1,12 @@
 A novel UI for exploring nested topics using LLMs to generate deeply nested "concept" trees
 
 Expand the tree conditioned on the previous branches
-![image](https://github.com/user-attachments/assets/22ab6103-14eb-4fc8-af9a-587ea9e494be)
+![image](https://github.com/user-attachments/assets/a483a56f-001f-4803-82ad-999c0ee37777)
 
 Edit branches to guide generation
 
-![image](https://github.com/user-attachments/assets/f90608ac-287a-4b77-8624-28a4dc1da581)
+![image](https://github.com/user-attachments/assets/37d8fc84-8da5-4907-a67b-06a935e146dd)
+
 
 The main novelty here is that generating tree branches is done through a single prompt and using its ancestor branches as context
 ```
