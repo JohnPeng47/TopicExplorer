@@ -31,7 +31,7 @@ export class RFTreeOps {
     node: Node<RFNodeData>, 
     parentId: NodeID, 
     rfState: RFState, 
-    childIndex: number = 0
+    childIndex = 0
   ): RFState {
     const [ nodes, edges ] = rfState;
     // root node 
@@ -39,7 +39,7 @@ export class RFTreeOps {
       nodes.push(node)
       return [ nodes, edges ]
     }
-    
+
     const parentIndex = nodes.findIndex(node => node.id === parentId);
     const nodeIndex = parentIndex + 1 + childIndex;
 
@@ -50,10 +50,7 @@ export class RFTreeOps {
 
     edges.push(newEdge);
     nodes.splice(nodeIndex, 0, node);
-    console.log(`NodeIndex: ${nodeIndex}, parentIndex: ${parentIndex}, childIndex: ${childIndex}`);
-    // console.log(`Adding node: ${node.data.title} at ${nodeIndex}`);
-    // console.log("Nodes: ", nodes.map(node => node.data.title));
-  
+
     return [ nodes, edges ] 
   }
 
@@ -73,7 +70,7 @@ export class RFTreeOps {
 
   public deleteNode(
     parentNode: Node<RFNodeData>,
-    childStates: RFState,
+    childStates: RFState
   ): void {
     const [deleteNodes, deleteEdges ] = childStates;
     deleteNodes.push(parentNode);
@@ -85,7 +82,7 @@ export class RFTreeOps {
   public addNode(
     node: Node<RFNodeData>,
     parentId: NodeID,
-    index: number = 0
+    index = 0
   ): void {
     const rfState = this.addNodeInternal(node, parentId, [this.nodeState, this.edgeState], index);
     this.setRFState(rfState);

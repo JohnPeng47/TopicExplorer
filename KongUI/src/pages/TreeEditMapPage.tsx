@@ -1,119 +1,127 @@
 import { useCallback, useEffect, useState, useMemo } from "react";
 import { useContext } from "use-context-selector";
+import { useContext as useContextReact } from "react";
 import ReactFlow, {
-    applyNodeChanges,
-    applyEdgeChanges,
     ReactFlowProvider,
+    Node,
     useNodesState,
     useEdgesState
 } from "reactflow";
 import { useParams } from "react-router-dom";
-import TreeNode from "../concept_map/components/node/TreeNode";
-import TextContentNode from "../concept_map/components/node/TextContentNode";
-import { Fab } from "@mui/material";
-import QuizIcon from "@mui/icons-material/Add";
-import { TreeEditMapContext, TreeEditMapProvider } from "../concept_map/provider/TreeEditMapProvider";
-import SideMenu from "../concept_map/components/SideMenu";
-import { RFNodeData } from "../common/common-types";
-import { createElement } from 'react';
-import { addPropsToRFNode } from "../concept_map/utils/types";
+import { BackendContext } from "@/network/BackendProvider";
+import TreeNode from "@/components/node/TreeNode";
+import { RFNodeData, NodeType } from "@/common/common-types";
+import { TreeEditMapProvider, TreeEditMapContext } from "@/provider/TreeEditMapProvider";
+import { BackendNode } from "@/common/common-types";
+import { GraphType } from "@/concept_map/data/processTree";
+import { NodeDataPosition } from "@/common/common-types";
+import { ConvertNode, ConvertEdge } from "@/concept_map/data/processNodes";
 
-function TreeEditMapPage() {
-  const [ initialized, setInitialized ] = useState(false);
-  const [ sideMenuOpen, setSideMenuOpen ] = useState(false);
-  const [ sideMenuData, setSideMenuData ] = useState<RFNodeData | null>(null);
-  const [ displayPgNodes, setdisplayPgNodes ] = useState(false);
+function initJson(
+  json: BackendNode,
+  graphType: GraphType
+): {
+  newNodes: Node<NodeDataPosition>[];
+  newEdges: any[]
+} {
+  const newNodes = [];
+  const newEdges = [];
 
-  const { mapId } = useParams();
+  const depth = 0;
+  const rootId = json.id;
+  let nodeIndex = 0;
 
-  const [nodes, setNodes] = useNodesState([]);
-  const [edges, setEdges] = useEdgesState([]);
-  const { 
-    downloadGraph,
-    displayDescriptionNodes,
-    restoreNodes
-  } = useContext(TreeEditMapContext);
+  const stack: Array<[BackendNode, number, string]> = [[json, depth, rootId]];
 
-  if (!initialized) {
-    downloadGraph(mapId, "Tree");
-    setInitialized(true);
+  // return empty nodes and edges
+  if (!json) {
+    return { newNodes, newEdges };
   }
 
-  const onNodesChange = useCallback(
-    (changes) => setNodes((nds) => applyNodeChanges(changes, nds)),
-    []
-  );
-  const onEdgesChange = useCallback(
-    (changes) => setEdges((eds) => applyEdgeChanges(changes, eds)),
-    []
-  );
+  while (stack.length > 0) {
+    const [currNode, depth, parentId] = stack.pop();
+    const rfNode = ConvertNode(currNode, graphType) as Node<NodeDataPosition>;
+    const rfEdge = ConvertEdge(currNode, parentId, graphType);
 
-  const openSideMenu = (data: RFNodeData, open: boolean) => {
-    setSideMenuData(data);
-    setSideMenuOpen(open);
-  };
+    rfNode.data.depth = depth;
+    rfNode.data.nodeIndex = nodeIndex;
 
-  const nodeTypeWithSideMenu = useMemo(
-    () => ({
-        treeNode: addPropsToRFNode(TreeNode, {  openSideMenu: openSideMenu }),
-        textContentNode: TextContentNode
-    }), [] 
-  );
+    //node has not been seen by us before
+    newNodes.push(rfNode);
 
-  return (
-    <div style={{ height: '100%' }}>
-      <ReactFlow
-        nodes={nodes}
-        onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
-        edges={edges}
-        nodeTypes={nodeTypeWithSideMenu}
-        deleteKeyCode={null}
-        zoomOnDoubleClick={null}
-        // disable dragging
-        nodesDraggable={false}
-      >
-      </ReactFlow>
-      <Fab color="primary" aria-label="add" 
-        onClick={() => setSideMenuOpen(open => !open)}
-        sx={{
-         position: 'fixed', 
-         bottom: 100, 
-         right: 70,
-        }}>
-        <QuizIcon />
-      </Fab>
-      <Fab color="primary" aria-label="add" 
-        onClick={() => {
-          if (displayPgNodes) {
-            restoreNodes();
-            setdisplayPgNodes(false);
-          } else {
-            displayDescriptionNodes();
-            setdisplayPgNodes(true);
-          }
-        }}
-        sx={{
-         position: 'fixed', 
-         bottom: 100, 
-         left: 70,
-        }}>
-        <QuizIcon />
-      </Fab>
+    // all nodes not root
+    if (parentId !== currNode.id)
+      newEdges.push(rfEdge);
 
-      <SideMenu
-        data={sideMenuData}
-        isOpen={sideMenuOpen} 
-        setIsOpen={setSideMenuOpen}>
-      </SideMenu>
-    </div>
-  );
+    currNode.data.children?.forEach((child) => {
+      stack.push([child, depth + 1, currNode.id]);
+    })
+
+    nodeIndex += 1;
+  }
+
+  return { newNodes, newEdges };
 }
-  
-export default function () {
-  return (
-    <TreeEditMapProvider>
-      <TreeEditMapPage />
-    </TreeEditMapProvider>
-  );
+
+function TreeEditMapPage() {
+    const [isLoading, setIsLoading] = useState(true);
+    const [nodes, setNodes, onNodesChange] = useNodesState([]);
+    const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+    const [sideMenuOpen, setSideMenuOpen] = useState(false);
+    const [sideMenuData, setSideMenuData] = useState<RFNodeData | null>(null);
+    
+    const { mapId } = useParams();
+    const { backend } = useContext(BackendContext);
+    const { initGraph } = useContext(TreeEditMapContext);
+
+    useEffect(() => {
+      const fetchGraph = async () => {
+        const treeRes = await backend.downloadGraph(mapId);
+        const { newNodes, newEdges } = initJson(treeRes.data, "Tree");
+        
+        setNodes(newNodes);
+        setEdges(newEdges);
+        initGraph(newNodes, newEdges);
+        setIsLoading(false);
+      };
+      fetchGraph();
+    }, [mapId, backend, initGraph, setNodes, setEdges]);
+
+    const openSideMenu = useCallback((data: RFNodeData, open: boolean) => {
+        setSideMenuData(data);
+        setSideMenuOpen(open);
+    }, []);
+
+    const nodeTypes = useMemo(() => ({
+        treeNode: (props) => <TreeNode {...props} openSideMenu={openSideMenu} />,
+    }), [openSideMenu]);
+
+    return (
+        <div style={{ height: '100%' }}>
+            <ReactFlow
+                nodes={nodes}
+                onNodesChange={onNodesChange}
+                edges={edges}
+                onEdgesChange={onEdgesChange}
+                nodeTypes={nodeTypes}
+                deleteKeyCode={null}
+                zoomOnDoubleClick={false}
+                nodesDraggable={false}
+            >
+            </ReactFlow>
+            {/* You can add your SideMenu component here if needed */}
+        </div>
+    );
 }
+
+const TreeEditMapComponent = () => {
+    return (
+        <ReactFlowProvider>
+            <TreeEditMapProvider>
+                <TreeEditMapPage />
+            </TreeEditMapProvider>
+        </ReactFlowProvider>
+    );
+};
+
+export default TreeEditMapComponent;

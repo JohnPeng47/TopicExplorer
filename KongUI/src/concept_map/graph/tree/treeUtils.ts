@@ -15,7 +15,7 @@ import {
 import { CreateNode, CreateEdge } from "../../data/processTree";
 import { NumberLiteralType } from "typescript";
 import { RFTreeOps, RFState } from "./TreeOps";
-import { getBoxHeight } from "../../components/node/helper";
+import { getBoxHeight } from "@/components/node/helper";
 
 type DFSNode = {
   node: BackendNode | Node<RFNodeData>
@@ -63,10 +63,10 @@ export class TreeUtils {
    * DFS implementation
    */
   private DFS(root: any): DFSNode[] {
-    let nodeIndex = this.getNodeIndex(root.id);
+    const nodeIndex = this.getNodeIndex(root.id);
 
-    let traversalOrder: DFSNode[] = [];
-    let stack = [[root, 0, root.id]]; // Assuming root is the starting node, at depth 0 with no parent.
+    const traversalOrder: DFSNode[] = [];
+    const stack = [[root, 0, root.id]]; // Assuming root is the starting node, at depth 0 with no parent.
 
     while (stack.length > 0) {
       const [currNode, depth, parentId] = stack.pop();
@@ -101,7 +101,10 @@ export class TreeUtils {
   } => {
     const newNodes = [];
     const newEdges = [];
-    let [depth, rootId, nodeIndex] = [0, json.id, 0];
+
+    const depth = 0;
+    const rootId = json.id;
+    let nodeIndex = 0;
 
     const stack: Array<[BackendNode, number, string]> = [[json, depth, rootId]];
 
@@ -179,9 +182,6 @@ export class TreeUtils {
       })
     }
 
-    // console.log("After nodes: ", afterNodes.map(n => n.data.title));
-    // console.log("Updated nodes: ", updatedSubtreeNodes.map(n => n.data.description));
-
     const newNodes = beforeNodes
       // error here due to getNodes before after being 0
       // 
@@ -205,7 +205,46 @@ export class TreeUtils {
     }
   }
 
+  public getSubtreeasText = (nodeId: NodeID, includeAncestors = true): string => {
+    const result: string[] = [];
+    let startDepth = 0;
+    
+    if (includeAncestors) {
+      // Get ancestors
+      const ancestors: Node<RFNodeData>[] = [];
+      let currentNode = this.getNode(nodeId);
+      while (currentNode && currentNode.id !== this.root().id) {
+        ancestors.unshift(currentNode);
+        currentNode = this.parent(currentNode.id);
+      }
+      ancestors.unshift(this.root());
 
+      // Display ancestors
+      ancestors.forEach((node, index) => {
+        result.push(`${'|  '.repeat(index)}${node.data.title}<br>`);
+      });
+      startDepth = ancestors.length - 1;
+    }
+
+    // Helper function to recursively get children
+    const getChildren = (parentId: NodeID, depth: number) => {
+      const children = this.children(parentId);
+      children.forEach((child, index) => {
+        const isLast = index === children.length - 1;
+        const prefix = isLast ? '└─ ' : '├─ ';
+        result.push(`${'|  '.repeat(depth)}${prefix}${child.data.title}<br>`);
+        getChildren(child.id, depth + 1);
+      });
+    };
+
+    // Get and display children
+    getChildren(nodeId, startDepth);
+    if (!includeAncestors) {
+      result.unshift(`${this.getNode(nodeId).data.title}<br>`);
+    }
+
+    return result.join('');
+  }
   // REIMPLEMENTATION USING NEW PASS THROUGH METHOD
   /**
    * Primitive operation adds node as the first child to parent
@@ -223,7 +262,7 @@ export class TreeUtils {
   public addNode(
     node: Node<RFNodeData>,
     parentId: NodeID,
-    index: number = 0
+    index = 0
   ): void {
     if (!this.currentTreeOp)
       this.currentTreeOp = new RFTreeOps(this.getNodes(), this.getEdges());
@@ -232,9 +271,8 @@ export class TreeUtils {
   }
 
   public deleteNode(
-    parentID: NodeID,
+    parentID: NodeID
   ): void {
-
     const { childNodes, childEdges } = this.getAllChildren(parentID);
     const parentNode = this.getNode(parentID);
 
@@ -249,8 +287,6 @@ export class TreeUtils {
     // TODO: ideally we make this decision little more robust
     const treeNodes = nodes.filter(node => node.type === NodeType.TextContentNode).length > 0 
       ? false : true;
-    
-    console.log(">>>>>>>TreeNodes: ", treeNodes);
     const repoNodes = treeNodes 
       ? this.positionNodes(nodes, edges) : this.positionNodesV2(nodes, edges);
 
@@ -366,8 +402,8 @@ export class TreeUtils {
     const beforeEdges = this.getEdges().slice(0, nodeIndex - 1);
 
     // nodes that comes after the last children of the parent node
-    let afterNodes = this.getNodes().slice(nodeIndex + numNodes + 1);
-    let afterEdges = this.getEdges().slice(nodeIndex + numNodes + 1 - 1);
+    const afterNodes = this.getNodes().slice(nodeIndex + numNodes + 1);
+    const afterEdges = this.getEdges().slice(nodeIndex + numNodes + 1 - 1);
 
     return {
       beforeNodes,
@@ -420,7 +456,7 @@ export class TreeUtils {
     const traverseNodes = this.DFS(rootNode);
 
     // console.log(traverseNodes);
-    for (let dfs of traverseNodes) {
+    for (const dfs of traverseNodes) {
       console.log("t node: ", dfs.node.data.title);
       if (dfs.node.id === nodeId)
         return dfs.depth
@@ -438,8 +474,8 @@ export class TreeUtils {
   /**
    * Returns the current node index in vertical display
    */
-  private getNodeIndex(nodeId: NodeID): number {
-    return this.getNodes().findIndex(node => node.id === nodeId);
+  public getNodeIndex(nodeId: NodeID): number {
+    return this.getNodeIndexV2(nodeId, this.getNodes());
   }
 
   /**

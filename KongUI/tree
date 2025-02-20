@@ -1,0 +1,93 @@
+.
+├── README.md
+├── components.json
+├── craco.config.js
+├── package-lock.json
+├── package.json
+├── public
+│   ├── favicon.ico
+│   ├── index.html
+│   ├── logo192.png
+│   ├── logo512.png
+│   ├── manifest.json
+│   └── robots.txt
+├── src
+│   ├── App.css
+│   ├── App.tsx
+│   ├── authentication
+│   │   ├── Login.tsx
+│   │   └── Register.tsx
+│   ├── common
+│   │   ├── common-types.ts
+│   │   ├── hooks
+│   │   │   ├── useChangeCounter.ts
+│   │   │   └── useMemo.ts
+│   │   ├── provider
+│   │   │   └── AlertBoxProvider.tsx
+│   │   └── utils.ts
+│   ├── components
+│   │   ├── LargeModalWCopy.tsx
+│   │   ├── ModalWCopy.tsx
+│   │   ├── SearchBar.tsx
+│   │   ├── SideMenu.tsx
+│   │   ├── SplitScreenContainer.tsx
+│   │   ├── TextBox.tsx
+│   │   ├── Tooltip.tsx
+│   │   ├── Tooltipv2.tsx
+│   │   ├── TwitterTextBox.tsx
+│   │   ├── common-types.ts
+│   │   ├── node
+│   │   │   ├── DocumentNode.tsx
+│   │   │   ├── TreeNode.tsx
+│   │   │   ├── helper.ts
+│   │   │   └── types.ts
+│   │   └── ui
+│   │       ├── button.tsx
+│   │       ├── dialog.tsx
+│   │       ├── input.tsx
+│   │       ├── label.tsx
+│   │       ├── radio-group.tsx
+│   │       ├── scroll-area.tsx
+│   │       ├── sheet.tsx
+│   │       ├── textarea.tsx
+│   │       └── tooltip.tsx
+│   ├── concept_map
+│   │   ├── data
+│   │   │   ├── processJson.ts
+│   │   │   ├── processNodes.ts
+│   │   │   └── processTree.ts
+│   │   ├── graph
+│   │   │   └── tree
+│   │   │       ├── TreeOps.ts
+│   │   │       └── treeUtils.ts
+│   │   └── utils
+│   │       └── types.ts
+│   ├── index.css
+│   ├── index.d.ts
+│   ├── index.tsx
+│   ├── logo.svg
+│   ├── network
+│   │   ├── BackendProvider.tsx
+│   │   ├── processMap.ts
+│   │   └── tracking.ts
+│   ├── pages
+│   │   ├── ConceptMapPage.tsx
+│   │   ├── DocumentViewPage.tsx
+│   │   ├── ParentEditPage.tsx
+│   │   ├── SearchBarHomePage.tsx
+│   │   └── TreeEditMapPage.tsx
+│   ├── provider
+│   │   ├── ConceptMapProvider.tsx
+│   │   ├── DocumentViewProvider.tsx
+│   │   ├── ParentProvider.tsx
+│   │   ├── SplitScreenProvider.tsx
+│   │   └── TreeEditMapProvider.tsx
+│   ├── react-app-env.d.ts
+│   ├── reportWebVitals.ts
+│   ├── setupTests.ts
+│   └── utils.ts
+├── tailwind.config.js
+├── tree
+└── tsconfig.json
+
+17 directories, 73 files

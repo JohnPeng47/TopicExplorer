@@ -1,8 +1,5 @@
 import { CSSProperties } from "react";
 import { EdgeMarker, MarkerType } from "reactflow";
-import { Backend } from "./Backend";
-import { Node } from "reactflow";
-
 
 // basically typescript enums
 export type SchemaId = string & { readonly __schemaId: never };
@@ -13,6 +10,7 @@ export type Mutable<T> = { -readonly [P in keyof T]: T[P] };
 export type InputValue = InputSchemaValue | undefined;
 export type InputSchemaValue = string | number;
 export type NodeID = string
+export type DocumentID = string
 
 export type Position = {
   x : number,
@@ -39,12 +37,12 @@ export type BackendNodeData = {
 
 // Used for reactFlow nodes
 export type RFNodeData = BackendNodeData & {
-  id?: string,
+  id?: NodeID,
 };
 
 // This is only used in initial conversion from the backend
 export type RFNode = {
-  id: string;
+  id: NodeID;
   data: RFNodeData,
   type: NodeType;
   position?: {
@@ -71,6 +69,27 @@ export type RFEdge = {
     label?: string;
   };
 };
+
+// from server
+export type DocumentNodeList = {
+  graph_id: NodeID;
+  documents: DocumentNode[];
+}
+
+export type DocumentNode = {
+  id: DocumentID;
+  data: DocumentNodeData;
+  position?: Position;
+}
+export type DocumentNodeData = {
+  text: string;
+  subgraphId: NodeID;
+  id: DocumentID;
+}
+export interface NodeDataPosition extends RFNodeData {
+  depth: number;
+  nodeIndex: number;
+}
 
 export enum NodeType {
   AttachedNode = "attachedNode",
