@@ -11,9 +11,7 @@ import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { AlertBoxContext } from '../common/provider/AlertBoxProvider'
-
-// TODO: we should not be passing this here
-import { TreeEditMapContext } from '@/provider/TreeEditMapProvider'
+import { TreeEditMapContext } from '../concept_map/provider/TreeEditMapProvider'
 
 import { RFNodeData } from '../common/common-types';
 

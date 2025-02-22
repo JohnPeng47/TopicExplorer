@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useContext } from "use-context-selector"
-import { BackendContext } from "@/network/BackendProvider"
+import { BackendContext } from "../concept_map/provider/backendProvider"
 import { SearchBar, Suggestion } from '../components/SearchBar'
 import { useNavigate, useSearchParams } from 'react-router-dom' // Add useSearchParams
 

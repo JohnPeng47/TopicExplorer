@@ -3,8 +3,8 @@ export interface CopyModalProps {
     onClose: () => void;
     title: string;
     description: string;
-    actionLabel: string;
-    modalAction: (text: string) => void;
+    otherActionLabel: string;
+    onOtherAction: () => void;
   }
   
   

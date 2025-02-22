@@ -1,7 +1,7 @@
 [development]
 DB = "kongbot"
 DB_HOST = "localhost"
-DB_PORT = 8081
+DB_PORT = 27017
 API_HOST = "localhost"
 API_PORT = 8000
 LOG_CONFIG = "log_config/logger_windows.yaml"

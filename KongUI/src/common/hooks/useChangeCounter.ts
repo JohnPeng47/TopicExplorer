@@ -14,7 +14,6 @@ export const useChangeCounter = () => {
     // we have to wrap at some point, so I just arbitrarily chose 1 million
     setCounter((prev) => {
       const newValue = nextChangeCount(prev);
-      console.log("Change Counter: ", newValue);
       counterRef.current = newValue;
       return newValue;
     });

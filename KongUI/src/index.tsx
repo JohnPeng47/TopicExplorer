@@ -11,8 +11,6 @@ const root = ReactDOM.createRoot(
 );
 root.render(
   <div style={{ backgroundColor: '#d4e6b5', height: '100vh'}}>
-    <BrowserRouter>
       <App></App>
-    </BrowserRouter>
   </div>
 );

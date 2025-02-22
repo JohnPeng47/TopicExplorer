@@ -12,23 +12,28 @@ import ReactFlow, {
   OnEdgesChange,
 } from "reactflow";
 import { useContext } from "use-context-selector";
+import AttachedNode from "../concept_map/components/node/AttachedNode";
+import UnattachedNode from "../concept_map/components/node/UnattachedNode";
+import useForceLayout from "../concept_map/layout/useForceLayout";
 import { getColors } from "../common/common-types";
 
 import { useParams } from "react-router-dom";
 
 import "reactflow/dist/style.css";
-import TreeNode from "@/components/node/TreeNode";
-import { ConceptMapProvider, ConceptMapContext } from "@/provider/ConceptMapProvider";
+import TreeNode from "../concept_map/components/node/TreeNode";
+
+import useCytoScapeLayout from "../concept_map/layout/CytoscapeLayout";
+import { ConceptMapProvider, ConceptMapContext } from "../concept_map/provider/ConceptMapProvider";
 
 const nodeTypes = {
-  // attachedNode: AttachedNode,
-  // unattachedNode: UnattachedNode,
+  attachedNode: AttachedNode,
+  unattachedNode: UnattachedNode,
   treeNode: TreeNode
 };
 
 const ConceptMapPage = () => {
-  const initialNodes = [];
-  const initialEdges = [];
+  let initialNodes = [];
+  let initialEdges = [];
 
   const { mapId } = useParams();
   const [ initialized, setInitialized ] = useState<boolean>(false);
@@ -85,18 +90,20 @@ const ConceptMapPage = () => {
   if (!initialized) setInitialized(true);
 
   return (
-    <ReactFlow
-      nodes={nodes}
-      edges={edges}
-      onNodesChange={onNodesChange}
-      onEdgesChange={onEdgesChange}
-      // nodeTypes={nodeTypes}
-      fitView
-    >
-      <Panel position="top-right">
-        {/* <button onClick={onLayout}>layout</button> */}
-      </Panel>
-    </ReactFlow>
+    <ConceptMapProvider>
+      <ReactFlow
+        nodes={nodes}
+        edges={edges}
+        onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
+        // nodeTypes={nodeTypes}
+        fitView
+      >
+        <Panel position="top-right">
+          {/* <button onClick={onLayout}>layout</button> */}
+        </Panel>
+      </ReactFlow>
+    </ConceptMapProvider>
   );
 };
 

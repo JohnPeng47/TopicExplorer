@@ -5,7 +5,6 @@ import {
   RFEdge,
   RFNode
 } from "../../common/common-types";
-
 import {
   ConvertNode as ConvertTreeNode,
   ConvertEdge as ConvertTreeEdge,
@@ -15,7 +14,7 @@ import {
 import {
   ConvertNode as ConvertMapNode,
   ConvertEdge as ConvertMapEdge
-} from "../../network/processMap";
+} from "./processMap";
 
 export type GraphType = "Tree" | "ConceptMap";
 

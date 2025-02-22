@@ -16,7 +16,7 @@ import { useFloating, useInteractions, useClick, useDismiss, offset, flip, shift
 export type IconButton = {
   icon: IconType
   name: string
-  onClick: (...args: any[]) => void
+  onClick: () => void
 }
 
 type IconButtonRowProps = {

@@ -1,0 +1,1 @@
+npm run build && scp -i "C:\Users\jpeng\.ssh\hostinger" -r build/* root@147.79.78.153:/root/TopicExplorer/KongServer/build/

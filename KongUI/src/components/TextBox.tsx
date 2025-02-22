@@ -21,8 +21,6 @@ export function TextBox({ initValue, handleInputChange, onToggleExpand, onAddIte
   const [isFocused, setIsFocused] = useState(false)
   const textBoxRef = useRef<HTMLDivElement>(null)
 
-  const boxWidth = 500;
-
   const toggleExpand = () => {
     setExpanded(!expanded)
     onToggleExpand()
@@ -55,7 +53,7 @@ export function TextBox({ initValue, handleInputChange, onToggleExpand, onAddIte
   return (
     <div 
       ref={textBoxRef}
-      className={`w-full max-w-[${boxWidth}px] mx-auto bg-gray-100 rounded-lg shadow-md transition-all duration-150 ${isFocused ? 'transform scale-[1.02] ring-1 ring-gray-300' : ''}`}
+      className={`w-full max-w-[600px] mx-auto bg-gray-100 rounded-lg shadow-md transition-all duration-150 ${isFocused ? 'transform scale-[1.02] ring-1 ring-gray-300' : ''}`}
       onClick={handleFocus}
       tabIndex={0}
       onFocus={handleFocus}
