@@ -100,11 +100,11 @@ function TreeNode({ data, isConnectable, selected, xPos, yPos, openSideMenu}: Tr
       name: 'Expand Topics',
       onClick: handleGenerateSubtopics
     },
-    {
-      icon: RxBoxModel,
-      name: 'Gen Report',
-      onClick: handleGenReport
-    }
+    // {
+    //   icon: RxBoxModel,
+    //   name: 'Gen Report',
+    //   onClick: handleGenReport
+    // }
   ];
 
   return (

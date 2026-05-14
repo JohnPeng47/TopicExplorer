@@ -50,6 +50,24 @@ Here are some requirements:
 Now go generate it:
 """
 
+GEN_PARAGRAPH_FROM_TREEV2 = """
+You are given a tree, generate a short, single sentence, research note about it
+
+Here is the framing context. One sentence should be generated to connect the main content
+to the context:
+{ancestor_context}
+
+Here is the topic for the main content. Dedicate most of the paragraph to this:
+{main_topic}
+
+Here are some requirements:
+- Dense Facts: Should contain explicit references to maximum facts
+- Terse: Prose terse
+- No Section headings
+- Generated entry should be in the style of wikipedia                        
+Now go generate it:
+"""
+
 SUBTREE_V3 = """
 Given the following background context, complete the task:
 BACKGROUND CONTEXT:

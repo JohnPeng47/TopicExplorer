@@ -1,27 +1,24 @@
 
 from __future__ import annotations
 
-
 import jsonschema
-from langchain import LLMChain, PromptTemplate
-from langchain.callbacks import get_openai_callback
-from .cache import cache_result
-from src.KongBot.utils.db import KongBotDB
-
-import tiktoken
-
-from typing import Dict
-
-import asyncio
-
-from src.KongBot.utils import logger
-from src.KongBot.models.models import gpt3, gpt4, deterministic_openai_model
-
 import json
+import tiktoken
+from typing import Dict
+import dotenv
 import os
+from jinja2 import Template
 
-TRAVERSE_PROBABILITY = 0.7
+from langchain_core.prompts import PromptTemplate
+from langchain.callbacks import get_openai_callback
 
+from src.KongBot.utils.db import KongBotDB
+from src.KongBot.utils import logger
+from src.KongBot.models.models import OpenAIModel, AnthropicModel, ModelArguments
+
+from .cache import cache_result
+
+dotenv.load_dotenv()
 
 db_conn = KongBotDB()
 
@@ -33,7 +30,7 @@ class BaseLLM:
     prompt_args: Dict[str, str]
 
     # llmchain: openAI or BrowserGPT
-    llm: LLMChain
+    llm: OpenAIModel
 
     # list of args to pass to the Langchain PromptTemplate
     prompt_args: Dict = {}
@@ -56,34 +53,36 @@ class BaseLLM:
     def __init__(self, model, cache_policy, json_output, async_mode=False):
         # select model
         if model == "gpt3":
-            self.openai_model = gpt3
-        elif model == "gpt4":
-            self.openai_model = gpt4
-        else:
-            raise Exception(f"Requested mode: {model} does not exist")
+            args = ModelArguments(model_name="gpt3", api_key=os.getenv("OPENAI_API_KEY"))
+            self.llm = OpenAIModel(args)
+        elif model == "gpt-4o":
+            args = ModelArguments(model_name="gpt4o", api_key=os.getenv("OPENAI_API_KEY"))
+            self.llm = OpenAIModel(args)
+        elif model == "claude":
+            args = ModelArguments(model_name="claude", api_key=os.getenv("ANTHROPIC_API_KEY"))
 
         self.cache_policy = cache_policy
         self.json_output = json_output
         self.async_mode = async_mode
 
-    def init_prompt(self, template, **prompt_args):
+    def init_prompt(self, template, jinja=False, **prompt_args):
         self.template = template
-        # set args that are used later for promptetemplate
-        self.prompt_args = ({k: v for k, v in prompt_args.items()})
-
         if not template:
             raise Exception("No prompt template specified")
 
-        self.prompt = PromptTemplate(
-            template=template,
-            input_variables=[arg for arg in prompt_args.keys()]
-        )
+        if jinja:
+            jinja_template = Template(self.template)
+            self.prompt = jinja_template.render(**prompt_args)
+        else:
+            self.prompt = template.format(**prompt_args)
+        
+        # self.llm = LLMChain(
+        #     prompt=self.prompt,
+        #     llm=deterministic_openai_model if os.environ.get(
+        #         "OPENAI_DETERMINISTIC", None) == "1" else self.openai_model
+        # )
 
-        self.llm = LLMChain(
-            prompt=self.prompt,
-            llm=deterministic_openai_model if os.environ.get(
-                "OPENAI_DETERMINISTIC", None) == "1" else self.openai_model
-        )
+        self.llm = OpenAIModel()
 
     # assumes json formatting
     def _parse(self, text: str):
@@ -127,7 +126,9 @@ class BaseLLM:
         while retry > 0 and output is None:
             try:
                 with get_openai_callback() as cb:
-                    llm_response = self.llm.run(prompt_args)
+                    self.prompt.format(**prompt_args)
+                    llm_response = self.llm.query_sync(self.prompt)
+
                     output = self._parse(llm_response)
 
                     self.update_call_costs(

@@ -2,14 +2,16 @@
 DB = "kongbot"
 DB_HOST = "127.0.0.1"
 DB_PORT = 27017
-API_HOST = "127.0.0.1"
+API_HOST = "0.0.0.0"
 API_PORT = 3000
-LOG_CONFIG = "log_config/logger_windows.yaml"
+LOG_CONFIG = "log_config/logger_linux.yaml"
+JWT_SECRET = "OIWNGOEG"
 
 [production]
 DB = "kongbot"
-DB_HOST = "172.31.34.171"
+DB_HOST = "127.0.0.1"
 DB_PORT = 27017
-API_HOST = "127.0.0.1"
+API_HOST = "0.0.0.0"
 API_PORT = 3000
 LOG_CONFIG = "log_config/logger_linux.yaml"
+JWT_SECRET = "OIWNGOEG"

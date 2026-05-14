@@ -13,10 +13,15 @@ from src.server.routes.auth.routes import router as auth_router
 from src.server.routes.events.route import router as events_router
 from src.server.routes.static.route import router as static_router
 from src.server.routes.essay.route import router as essay_router
+from src.server.routes.documents.route import document_router
 
 from src.server.utils.utils import log_start_banner
 
 from config import settings
+
+API_PREFIX = "TopicExplorer"
+STATIC_DIR = "build"
+
 
 logger = getLogger("base")
 log_start_banner()
@@ -24,23 +29,21 @@ log_start_banner()
 app = FastAPI()
 
 # Set up the CORS middleware
-origins = [
-    "http://localhost:3000",  # Allow requests from your local frontend
-    "http://localhost:5900",
-    "http://localhost:10559",
-    "http://18.221.129.100:8000",
-    "http://172.31.32.87:8000"
-]
+# origins = [
+#     "http://localhost:3000",  # Allow requests from your local frontend
+#     "http://localhost:5900",
+#     "http://localhost:10559",
+#     "http://18.221.129.100:8000",
+#     "http://172.31.32.87:8000"
+# ]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["*"],  # Allow all origins
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-STATIC_DIR = "build"
 app.mount(
     "/static", StaticFiles(directory=os.path.join(STATIC_DIR, "static")))
 
@@ -61,6 +64,7 @@ app.include_router(graph_router)
 app.include_router(auth_router)
 app.include_router(events_router)
 app.include_router(essay_router)
+app.include_router(document_router)
 
 from src.server.routes.graph.route import get_tree_router as tree_router
 from src.server.routes.graph.service import GraphManager
@@ -76,7 +80,8 @@ with open(settings.LOG_CONFIG, "r") as config_file:
 
 if __name__ == "__main__":
     uvicorn.run("app:app", 
-                host="0.0.0.0", 
-                port=settings.API_PORT, 
+                # host="0.0.0.0",
+                host="127.0.0.1",
+                port=8086, 
                 reload=True, 
                 log_config=yaml_config)

@@ -545,8 +545,8 @@ class KnowledgeGraph(DiGraph):
                 ancestors_depth += 1
 
         # add separator between ancestors and tree
-        if lineage:
-            ancestors_display += "=========SEPARATOR=========\n"
+        # if lineage:
+        #     ancestors_display += "=========SEPARATOR=========\n"
 
         # if ancestors, add them to the depth count
         depth = ancestors_depth if depth == 0 else depth

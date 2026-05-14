@@ -50,8 +50,8 @@ loggers:
       - access
       - file
     propagate: no
-root:
-  level: DEBUG
-  handlers:
-    - default
-  propagate: no
+# root:
+#   level: DEBUG
+#   handlers:
+#     - default
+#   propagate: no

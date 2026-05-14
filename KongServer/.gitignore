@@ -3,3 +3,5 @@ build/
 .vscode/
 # Ignore dynaconf secret files
 .secrets.*
+# Environment files
+.env

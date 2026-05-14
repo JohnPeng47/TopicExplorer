@@ -33,6 +33,8 @@ def generate_subtree(graph: KnowledgeGraph,
     while retry > 0 and not success:
         try:
             llm_instr = LLM_INSTR_PRE.format(llm_instr) if llm_instr else ""
+            print("Generating with curriculum: ", graph.curriculum)
+            
             subtree = GenSubTreeQueryV3(graph.curriculum,
                                         ancestors,
                                         subtree,

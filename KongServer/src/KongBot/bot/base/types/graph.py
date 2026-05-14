@@ -4,11 +4,11 @@ from typing import Optional, List, Dict
 class GraphNodeData(BaseModel):
     title: str
     node_type: str
-    description: Optional[str]
-    entity_relations: Optional[List[Dict]]
-    concept: Optional[str]
-    color: Optional[str]
-    children: List["GraphNode"]
+    description: Optional[str] = ""
+    entity_relations: Optional[List[Dict]] = []
+    concept: Optional[str] = ""
+    color: Optional[str] = ""
+    children: List["GraphNode"] = []
 
 class GraphNode(BaseModel):
     id: str

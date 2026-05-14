@@ -41,10 +41,6 @@ coverage/
 Thumbs.db
 Desktop.ini
 
-# Environment files
-.env
-*.env
-
 # Python
 __pycache__/
 *.py[cod]

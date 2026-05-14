@@ -1,6 +1,9 @@
-from pydantic import BaseModel
-from typing import Optional, List, Dict, Union
+from pydantic import BaseModel, Field
+from typing import Optional, List, Dict, Union, NewType
 import enum
+
+NodeId = NewType("NodeId", str)    
+DocumentId = NewType("DocumentId", str)
 
 class Position(BaseModel):
     x: int
@@ -9,15 +12,16 @@ class Position(BaseModel):
 class GraphNodeData(BaseModel):
     title: str
     node_type: str
-    description: Optional[str]
-    entity_relations: Optional[List[Dict]]
-    concept: Optional[str]
-    color: Optional[str]
-    children: Optional[List["GraphNode"]]
+    description: Optional[str] = ""
+    entity_relations: Optional[List[Dict]] = []
+    concept: Optional[str] = ""
+    color: Optional[str] = ""
+    children: List["GraphNode"] = []
+
 
 class GraphNode(BaseModel):
-    id: str
-    hidden: Optional[bool]
+    id: NodeId
+    hidden: Optional[bool] = True
     data: GraphNodeData
     position: Position
 
@@ -29,18 +33,18 @@ class GraphMetadata(BaseModel):
     title: str
 
 class GraphMetadataResp(BaseModel):
-    id: str
+    id: NodeId
     metadata: GraphMetadata
 
 # RFNode 
 class RFNode(BaseModel):
-    id: str
+    id: NodeId
     data: GraphNodeData
     hidden: bool
     position: Position
     positionAbsolute: Position
-    height: Optional[int]
-    width: Optional[int]
+    height: Optional[int] = Field(default=0)
+    width: Optional[int] = Field(default=0)
     
 class SaveGraphReq(BaseModel):
     title: str
@@ -51,8 +55,11 @@ class CreateGraphRequest(BaseModel):
     curriculum: str
 
 
-# Generator requests
+# Graph get requests
+class GetSubgraphTree(BaseModel):
+    subgraph_id: NodeId
 
+# Generator requests
 class GenSubgraphTopicsRequest(BaseModel):
     subgraph: RFNode
     model: str
@@ -62,7 +69,7 @@ class GenSubGraphTopicsResponse(BaseModel):
     subgraph: RFNode
 
 class GenParagraphRequest(BaseModel):
-    subgraph_id: str
+    subgraph_id: NodeId
     model: str
     llmInstr: str
 

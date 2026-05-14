@@ -6,6 +6,8 @@ import concurrent.futures
 import json
 
 import logging
+
+from .prompt import Prompt
 # circular import
 # from src.KongBot.explorationv2.generators.types import MTLLMArg
 
@@ -118,9 +120,9 @@ class BaseLLMQueryV2(BaseLLM):
         # it for multiple args
         return cls("placeholder1", cache_policy=cache_policy, model=model)
     
-    def init_prompt(self, prompt_template, **prompt_args):
+    def init_prompt(self, prompt_template, jinja=False, **prompt_args):
         self.prompt_template = prompt_template
-        super().init_prompt(prompt_template, **prompt_args)
+        super().init_prompt(prompt_template, jinja=jinja, **prompt_args)
 
         # trigger eval flow
         # if self.evaluate:
@@ -128,6 +130,7 @@ class BaseLLMQueryV2(BaseLLM):
         #     logger.debug(self.prompt_template)
         #     # this will call the child
         #     logger.debug(self.get_llm_output())
+
 
     def eval_prompt(self):
         pass

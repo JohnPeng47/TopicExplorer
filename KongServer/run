@@ -1,0 +1,1 @@
+screen -mS kongserver python3 app.py
